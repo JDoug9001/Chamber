@@ -2,44 +2,45 @@
 
 volatile int value=0;
 const byte Solenoid = 13;
-const byte IntPin = 2;
+const byte IntPin1 = 2;
+const byte IntPin2 = 3;
 volatile byte state = 0;
 const byte SwitchFunctionButton = 10;
 //Testing 1 2 3
 
 void setup() {
 
-{
   pinMode (solenoid, OUTPUT);
-  pinMode (IntPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(IntPin), blink, RISING);
+  pinMode (IntPin1, INPUT_PULLUP);
+  pinMode (IntPin2, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(IntPin1), Prox_ISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(IntPin2), Mode_ISR, RISING);
+  
+  // Variables 
 
-// Variables 
-
-int ProxCounter = 0; // counter for the number of Prox Sensor        
-int LastProxState = 0; // previous state of the Prox Sensor
-int Reload = 0; //Initiate Reload State 
-int RandomInt = 0; //Random number for malfunction
-int PrevRandInt = 0; //Previous random number to prevent repeated value
-int Malfunction = 0; //Malfuntion function  
-int SwitchFunctionButton_State = 1; //Button State for switching functions
-int Timeout = 0; //
+  int ProxCounter = 0; // counter for the number of Prox Sensor        
+  int LastProxState = 0; // previous state of the Prox Sensor
+  int Reload = 0; //Initiate Reload State 
+  int RandomInt = 0; //Random number for malfunction
+  int PrevRandInt = 0; //Previous random number to prevent repeated value
+  int Malfunction = 0; //Malfuntion function  
+  int SwitchFunctionButton_State = 1; //Button State for switching functions
+  int Timeout = 0; //
 
 
-// Inputs and Outputs
+  // Inputs and Outputs
 
-pinMode (ProxState, INPUT_PULLUP); //current state of the Prox Sensor
-pinMode (MagButton, INPUT); //Momentary push for mag "tap"
-pinMode (SlideTof, INPUT); //SlideTOF sensor for distance shows slide distance from device
-pinMode (MagTof_OldValue, INPUT); //Old value for MagTof
-pinMode (Solenoid, OUTPUT); //Solenoid to push the slide
-pinMode (SwitchFunctionButton, INPUT); //Button to switch between the three functions
-pinMode (Blue_Led_1, OUTPUT); //LED to indicate which function is being run
-pinMode (Blue_Led_2, OUTPUT); //LED to indicate which function is being run
-pinMode (Blue_Led_3, OUTPUT); //LED to indicate which function is being run
-pinMode (RGB_Led, OUTPUT); //LED to indicate power level 
-pinMode (VibrationSens, INPUT_PULLUP); //Motion switch to turn on 
-}
+  pinMode (ProxState, INPUT_PULLUP); //current state of the Prox Sensor
+  pinMode (MagButton, INPUT); //Momentary push for mag "tap"
+  pinMode (SlideTof, INPUT); //SlideTOF sensor for distance shows slide distance from device
+  pinMode (MagTof_OldValue, INPUT); //Old value for MagTof
+  pinMode (Solenoid, OUTPUT); //Solenoid to push the slide
+  pinMode (SwitchFunctionButton, INPUT); //Button to switch between the three functions
+  pinMode (Blue_Led_1, OUTPUT); //LED to indicate which function is being run
+  pinMode (Blue_Led_2, OUTPUT); //LED to indicate which function is being run
+  pinMode (Blue_Led_3, OUTPUT); //LED to indicate which function is being run
+  pinMode (RGB_Led, OUTPUT); //LED to indicate power level 
+  pinMode (VibrationSens, INPUT_PULLUP); //Motion switch to turn on 
 }
 
 
@@ -58,6 +59,24 @@ void loop() {
       SwitchFunctionButton_State = 1;
     }
   }
+  switch (SwitchFunctionButton_State)
+  {
+    case 1: // code to be executed if SwitchFunctionButton_State = 1;
+      Blue_Led_1 = HIGH;
+      break;
+    case 2: // code to be executed if SwitchFunctionButton_State = 2;
+      Blue_Led_1 = HIGH;
+      Blue_Led_2 = HIGH; 
+      Reload_Function(); 
+      break;
+    case 3: // code to be executed if SwitchFunctionButton_State = 3;
+      Blue_Led_1 = HIGH;
+      Blue_Led_2 = HIGH;
+      Blue_Led_3 = HIGH;
+      Random_Function();
+      break;   
+    default: // code to be executed if n doesn't match any cases
+  }
 
   if((value==1)&&(Malfunction !=1)&&(Reload !=1){
     digitalWrite(Solenoid, HIGH);
@@ -69,42 +88,36 @@ void loop() {
   }
 }
 
-void blink(){
+void Prox_ISR(){
+  ProxCounter++;
   value = 1;
   sei();
 }
 
+void Mode_ISR(){
+  ProxCounter++;
+  value = 1;
+  sei();
+}
+
+void Reload_Function(){
+  if (ProxCounter == 15) {
+}
+}
+
+
+void Random_Function(){
+ 
+}
 
 
 
-  switch (SwitchFunctionButton_State)
-  {
-      case 1: // code to be executed if SwitchFunctionButton_State = 1;
-        Blue_Led_1 = HIGH;
-        break;
-      case 2: // code to be executed if SwitchFunctionButton_State = 2;
-        Blue_Led_1 = HIGH;
-        Blue_Led_2 = HIGH; 
-        Reload_Function(); 
-        break;
-      case 3: // code to be executed if SwitchFunctionButton_State = 3;
-        Blue_Led_1 = HIGH;
-        Blue_Led_2 = HIGH;
-        Blue_Led_3 = HIGH;
-        Random_Function();
-        break;   
-      default: // code to be executed if n doesn't match any cases
-  }
-
+ 
 
 
 
 
-  //Continuous Function Called
-    if (SwitchFunctionButton_State==1){
-  Blue_Led_1 = HIGH;
-    }
- //End Continuous Function
+
 
 
 
