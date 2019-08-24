@@ -52,8 +52,7 @@ pinMode (VibrationSens, INPUT_PULLUP); //Motion switch to turn on
 
 void loop() {
   //Button to switch between programs
-  SwitchFunctionButton_State = digitalRead(SwitchFunctionButton);
-  if(SwitchFunctionButton == HIGH){ //If a button is pressed then the device will cycle through its 3 modes
+  if(digitalRead(SwitchFunctionButton) == HIGH){ //If a button is pressed then the device will cycle through its 3 modes
     SwitchFunctionButton_State++
     if(SwitchFunctionButton_State > 3){
       SwitchFunctionButton_State = 1;
