@@ -77,13 +77,31 @@ void blink(){
 
 
 
+  switch (SwitchFunctionButton_State)
+  {
+      case 1: // code to be executed if SwitchFunctionButton_State = 1;
+        Blue_Led_1 = HIGH;
+        break;
+      case 2: // code to be executed if SwitchFunctionButton_State = 2;
+        Blue_Led_1 = HIGH;
+        Blue_Led_2 = HIGH; 
+        Reload_Function(); 
+        break;
+      case 3: // code to be executed if SwitchFunctionButton_State = 3;
+        Blue_Led_1 = HIGH;
+        Blue_Led_2 = HIGH;
+        Blue_Led_3 = HIGH;
+        Random_Function();
+        break;   
+      default: // code to be executed if n doesn't match any cases
+  }
 
 
 
 
 
   //Continuous Function Called
-    if (SwitchFunctionButton==1){
+    if (SwitchFunctionButton_State==1){
   Blue_Led_1 = HIGH;
     }
  //End Continuous Function
