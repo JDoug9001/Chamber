@@ -4,7 +4,7 @@ volatile int value=0;
 const byte Solenoid = 13;
 const byte IntPin = 2;
 volatile byte state = 0;
-
+const byte SwitchFunctionButton = 10;
 //Testing 1 2 3
 
 void setup() {
@@ -51,41 +51,36 @@ pinMode (VibrationSens, INPUT_PULLUP); //Motion switch to turn on
 
 
 void loop() {
-
-{
-
-
-    if((value==1)&&(Malfunction !=1)&&(Reload !=1)
-    {
-      digitalWrite(Solenoid, HIGH);
-      delay(500);
-      digitalWrite(Solenoid, LOW);
-      delay(500);
-
-      value=0;
+  //Button to switch between programs
+  SwitchFunctionButton_State = digitalRead(SwitchFunctionButton);
+  if(SwitchFunctionButton == HIGH){ //If a button is pressed then the device will cycle through its 3 modes
+    SwitchFunctionButton_State++
+    if(SwitchFunctionButton_State > 3){
+      SwitchFunctionButton_State = 1;
     }
+  }
+
+  if((value==1)&&(Malfunction !=1)&&(Reload !=1){
+    digitalWrite(Solenoid, HIGH);
+    delay(500);
+    digitalWrite(Solenoid, LOW);
+    delay(500);
+
+    value=0;
+  }
 }
 
-      void blink(){
-        value = 1;
-        sei();
-      }
+void blink(){
+  value = 1;
+  sei();
+}
 
 
 
 
 
 
-  //Button to switch between programs
-    SwitchFunctionButton_State = digitalRead(Button Pin);
 
-    if(SwitchFunctionButton_State == HIGH){
-        SwitchFunctionButton_State++
-    
-    if(SwitchFunctionButton_State>3){
-       SwitchFunctionButton_State = 1;
-    }
-    }
 
 
   //Continuous Function Called
