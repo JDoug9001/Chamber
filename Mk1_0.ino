@@ -1,4 +1,7 @@
 #include "avr/interrupt.h" 
+#include "Adafruit_VL53L0X.h"
+
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
 volatile int value=0;
 const byte Solenoid = 13;
@@ -7,7 +10,8 @@ const byte IntPin2 = 3;
 const byte IntPin3 =4;
 volatile byte state = 0;
 const byte SwitchFunctionButton = 10;
-volatile byte MagTof = 5;
+volatile byte MagTof = 0;
+volatile byte SlideTof = 1;
 int VibraSensPin = 6;
 
 void setup() {
@@ -28,9 +32,8 @@ void setup() {
   int Malfunction = 0; //Malfuntion function  
   int SwitchFunctionButton_State = 1; //Button State for switching functions
   int Timeout = 0; //
-  int MagTof_Remove = MagTof;
-  int MagTof_Insert = MagTof;
-  int VibraSens = 0; 
+  int Mag_Distance = 20;
+   int VibraSens = 0; 
   
   // Inputs and Outputs
 
@@ -46,7 +49,22 @@ void setup() {
   pinMode (Blue_Led_3, OUTPUT); //LED to indicate which function is being run
   pinMode (RGB_Led, OUTPUT); //LED to indicate power level 
   pinMode (VibraSens, INPUT); //Motion switch to turn on 
+
+  Serial.begin(115200);
+
+  // wait until serial port opens for native USB devices
+  while (! Serial) {
+    delay(1);
+  }
   
+  if (!lox.begin()) {
+    Serial.println(F("Failed to boot VL53L0X"));
+    while(1);
+  }
+  // power 
+  //Serial.println(F("VL53L0X API Simple Ranging example\n\n")); 
+
+} 
 }
 
 
@@ -105,13 +123,13 @@ void Reload_Mode(){
   if (ProxCounter == 15) {
     Reload = 1;
     if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
-    analogRead(MagTof);
-      if (MagTof_Remove>xxx distance){
-      PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
-      ProxCounter = 1; //Reset the count to zero
-      analogRead(MagTof);
-        if(MagTof_Insert<xxx distance)
-        Reload = 0; //Reset Main interrupt 
+      Distance = Get_Tof_Dist(MagTof);
+      for (Distance > Mag_Distance){
+        PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
+        ProxCounter = 1; //Reset the count to zero
+        Get_Tof_Dist(MagTof);
+        if(Mag_Distance<xxx distance)
+          Reload = 0; //Reset Main interrupt 
   }
   }
   Cycle_Slide();
@@ -130,7 +148,7 @@ void Random_Mode(){
     if (Malfunction = 1){ //If Momentary is pushed then Tof reaches certain distance go high then malfunction is reset to zero and then the cycle will continue to loop until 15 actuations are reached
     digitalRead (MagButton); //"Mag" is tapped
       if(MagButton == HIGH){
-      analogRead (SlideTof);
+      Get_Mag_Tof (SlideTof);
         if (SlideTof> XXX){  //Tof sensor says slide was pulled back X distance ie racked. Solenoid is turned off 
         Malfunction = 0;     //Malfunction is cleared
 }
@@ -150,6 +168,21 @@ void Cycle_Slide(){
   } 
 }
 
+
+int Get_Tof_Dist(int sensor) {
+  VL53L0X_RangingMeasurementData_t measure;
+    
+  Serial.print("Reading a measurement... ");
+  lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+
+  if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
+  } else {
+    Serial.println(" out of range ");
+  }
+    
+  delay(100);
+}
 
 //Wireless signal transmission/receiveing,  deepsleep and wake interrupt
 
