@@ -4,9 +4,11 @@ volatile int value=0;
 const byte Solenoid = 13;
 const byte IntPin1 = 2;
 const byte IntPin2 = 3;
+const byte IntPin3 =4;
 volatile byte state = 0;
 const byte SwitchFunctionButton = 10;
-//Testing 1 2 3
+volatile byte MagTof = 5;
+int VibraSensPin = 6;
 
 void setup() {
 
@@ -15,7 +17,7 @@ void setup() {
   pinMode (IntPin2, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(IntPin1), Prox_ISR, RISING);
   attachInterrupt(digitalPinToInterrupt(IntPin2), Mode_ISR, RISING);
-  
+  attachInterrupt(digitaPinToInterrupt(IntPin3), Vibra_ISR, CHANGE); 
   // Variables 
 
   int ProxCounter = 1; // counter for the number of Prox Sensor        
@@ -26,30 +28,30 @@ void setup() {
   int Malfunction = 0; //Malfuntion function  
   int SwitchFunctionButton_State = 1; //Button State for switching functions
   int Timeout = 0; //
-
-
+  int MagTof_Remove = MagTof;
+  int MagTof_Insert = MagTof;
+  int VibraSens = 0; 
+  
   // Inputs and Outputs
 
   pinMode (ProxState, INPUT_PULLUP); //current state of the Prox Sensor
   pinMode (MagButton, INPUT); //Momentary push for mag "tap"
   pinMode (SlideTof, INPUT); //SlideTOF sensor for distance shows slide distance from device
-  pinMode (MagTof_OldValue, INPUT); //Old value for MagTof
+  pinMode (MagTof_Remove, INPUT); //value for removing MagTof
+  pinMode (MagTof_Insert, INPUT); //value for Inserting MagTof Read the same pin for both magtof remove and insert
   pinMode (Solenoid, OUTPUT); //Solenoid to push the slide
   pinMode (SwitchFunctionButton, INPUT); //Button to switch between the three functions
   pinMode (Blue_Led_1, OUTPUT); //LED to indicate which function is being run
   pinMode (Blue_Led_2, OUTPUT); //LED to indicate which function is being run
   pinMode (Blue_Led_3, OUTPUT); //LED to indicate which function is being run
   pinMode (RGB_Led, OUTPUT); //LED to indicate power level 
-  pinMode (VibrationSens, INPUT_PULLUP); //Motion switch to turn on 
+  pinMode (VibraSens, INPUT); //Motion switch to turn on 
+  
 }
 
 
 
 void loop() {
-   //Deep sleep
-// Interrupt for turning on device goes here set Timeout = 1. 
-// If motion sensor isnt hit again within X time limit. timeout resets to zero. Program exits the loop
-}
 
 
 void Prox_ISR(){
@@ -102,6 +104,15 @@ void Mode_ISR(){
 void Reload_Mode(){
   if (ProxCounter == 15) {
     Reload = 1;
+    if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
+    analogRead(MagTof);
+      if (MagTof_Remove>xxx distance){
+      PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
+      ProxCounter = 1; //Reset the count to zero
+      analogRead(MagTof);
+        if(MagTof_Insert<xxx distance)
+        Reload = 0; //Reset Main interrupt 
+  }
   }
   Cycle_Slide();
 }
@@ -115,8 +126,18 @@ void Random_Mode(){
   }
   //Stop main interrupt from functioning when the random number and counter number are the same
   if (ProxCounter == RandomInt){
-    Malfunction = 1;    //In main interrupts Malfunction!=1
-  }
+  Malfunction = 1;    //In main interrupts Malfunction!=1
+    if (Malfunction = 1){ //If Momentary is pushed then Tof reaches certain distance go high then malfunction is reset to zero and then the cycle will continue to loop until 15 actuations are reached
+    digitalRead (MagButton); //"Mag" is tapped
+      if(MagButton == HIGH){
+      analogRead (SlideTof);
+        if (SlideTof> XXX){  //Tof sensor says slide was pulled back X distance ie racked. Solenoid is turned off 
+        Malfunction = 0;     //Malfunction is cleared
+}
+} 
+}
+}
+}
   Reload_Mode();
 }
 
@@ -130,45 +151,80 @@ void Cycle_Slide(){
 }
 
 
+//Wireless signal transmission/receiveing,  deepsleep and wake interrupt
 
 
 
+//Code for transmitter
+/*
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+RF24 radio(9, 10); // CE, CSN         
+const byte address[6] = "00001";     //Byte of array representing the address. This is the address where we will send the data. This should be same on the receiving side.
+int button_pin = 2;
+boolean button_state = 0;
+void setup() {
+pinMode(button_pin, INPUT);
+radio.begin();                  //Starting the Wireless communication
+radio.openWritingPipe(address); //Setting the address where we will send the data
+radio.setPALevel(RF24_PA_MIN);  //You can set it as minimum or maximum depending on the distance between the transmitter and receiver.
+radio.stopListening();          //This sets the module as transmitter
+}
+void loop()
+{
+button_state = digitalRead(button_pin);
+if(button_state == HIGH)
+{
+const char text[] = "Your Button State is HIGH";
+radio.write(&text, sizeof(text));                  //Sending the message to receiver
+}
+else
+{
+const char text[] = "Your Button State is LOW";
+radio.write(&text, sizeof(text));                  //Sending the message to receiver 
+}
+radio.write(&button_state, sizeof(button_state));  //Sending the message to receiver 
+delay(1000);
+}
+*/
 
-//   // if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
-//     MagTof_NewValue = analogRead(A?); //Read the input on analog pin
-//     if(MagTof_NewValue < MagTof_OldValue){ //The Zero value for Old value can be changed in the future to the value equal to the sensor home distant from the bottom of the slide
-//           PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
-//           ProxCounter = 1; //Reset the count to zero 
-//           if(MagTof_NewValue > MagTof_OldValue){ 
-//                   Reload=0; //Reset Main interrupt           
-//                   }
-//   }
+//Code for receiver
+/*
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+RF24 radio(9, 10); // CE, CSN
+const byte address[6] = "00001";
+boolean button_state = 0;
+int led_pin = 3;
+void setup() {
+pinMode(6, OUTPUT);
+Serial.begin(9600);
+radio.begin();
+radio.openReadingPipe(0, address);   //Setting the address at which we will receive the data
+radio.setPALevel(RF24_PA_MIN);       //You can set this as minimum or maximum depending on the distance between the transmitter and receiver.
+radio.startListening();              //This sets the module as receiver
+}
+void loop()
+{
+if (radio.available())              //Looking for the data.
+{
+char text[32] = "";                 //Saving the incoming data
+radio.read(&text, sizeof(text));    //Reading the data
+radio.read(&button_state, sizeof(button_state));    //Reading the data
+if(button_state == HIGH)
+{
+digitalWrite(6, HIGH);
+Serial.println(text);
+}
+else
+{
+digitalWrite(6, LOW);
+Serial.println(text);}
+}
+delay(5);
+} 
+*/
 
-
-    
-// //Random Function Called
-
-//       //Generate a random number. If it's that same as the previous number, generate a new number
-//        RandomInt = random(16); //Random number between 0-15
-//        while(RandomInt == PrevRandInt){
-//           RandomInt = random(16); //Random number between 0-15
-//           }
-//     //Stop main interrupt from functioning when the random number and counter number are the same
-//        if (ProxCounter == RandomInt){
-//             Malfunction = 1;    //In main interrupts Malfunction!=1
-//             }
-
-// //If Momentary is pushed then Tof reaches certain distance go high then malfunction is reset to zero and then the cycle will continue to loop until 15 actuations are reached
-//   if (Malfunction = 1){
-// //Have an interrupt to activate sensors
-//   digitalRead (MagButton); //"Mag" is tapped
-//   delay 500 //Time between tapping mag and pulling slide
-// if(MagButton == HIGH){
-//   analogRead (SlideTof);
-// }
-// }
-// if (SlideTof> XXX){  //Tof sensor says slide was pulled back X distance ie racked. Solenoid is turned off 
-//   Malfunction = 0;     //Malfunction is cleared
-// }
-
-// //Wireless signal transmission/receiveing, PWM for LEDS, POwer saving deep sleep/interrupt 
+// https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4
