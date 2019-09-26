@@ -33,7 +33,7 @@ void setup() {
   int SwitchFunctionButton_State = 1; //Button State for switching functions
   int Timeout = 0; //
   int Mag_Distance = 20;
-   int VibraSens = 0; 
+  int VibraSens = 0; 
   
   // Inputs and Outputs
 
@@ -77,7 +77,7 @@ void Prox_ISR(){
   switch (SwitchFunctionButton_State)
   {
     case 1: // code to be executed if SwitchFunctionButton_State = 1;
-    Cycle_Slide();
+      Cycle_Slide();
       break;
     case 2: // code to be executed if SwitchFunctionButton_State = 2;
       Reload_Mode(); 
@@ -123,14 +123,22 @@ void Reload_Mode(){
   if (ProxCounter == 15) {
     Reload = 1;
     if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
+      
       Distance = Get_Tof_Dist(MagTof);
-      for (Mag_Distance > Distance){
-        PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
-        ProxCounter = 1; //Reset the count to zero
-        Get_Tof_Dist(MagTof);
-        if(Mag_Distance<xxx distance)
-          Reload = 0; //Reset Main interrupt 
-  }
+      while (Distance < Mag_Distance){ // mag still in wait until it gets pulled
+        delay(1);
+        Distance = Get_Tof_Dist(MagTof);
+      }
+
+      Distance = Get_Tof_Dist(MagTof);
+      while (Distance > Mag_Distance){ // mag out, wait until it is replaced
+        delay(1);
+        Distance = Get_Tof_Dist(MagTof);
+      }
+      PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
+      ProxCounter = 1; //Reset the count to zero
+      Reload = 0; //Reset Main interrupt 
+    }
   }
   Cycle_Slide();
 }
@@ -144,20 +152,21 @@ void Random_Mode(){
   }
   //Stop main interrupt from functioning when the random number and counter number are the same
   if (ProxCounter == RandomInt){
-  Malfunction = 1;    //In main interrupts Malfunction!=1
+    Malfunction = 1;    //In main interrupts Malfunction!=1
     if (Malfunction = 1){ //If Momentary is pushed then Tof reaches certain distance go high then malfunction is reset to zero and then the cycle will continue to loop until 15 actuations are reached
-    digitalRead (MagButton); //"Mag" is tapped
+      digitalRead (MagButton); //"Mag" is tapped
       if(MagButton == HIGH){
-      Get_Mag_Tof (SlideTof);
+        Get_Mag_Tof (SlideTof);
         if (SlideTof> XXX){  //Tof sensor says slide was pulled back X distance ie racked. Solenoid is turned off 
-        Malfunction = 0;     //Malfunction is cleared
-}
-} 
-}
-}
+          Malfunction = 0;     //Malfunction is cleared
+        }
+      } 
+    }
+  }
 }
   Reload_Mode();
 }
+
 
 void Cycle_Slide(){
   if(Malfunction != 1)&&(Reload != 1){
