@@ -124,7 +124,7 @@ void Reload_Mode(){
     Reload = 1;
     if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
       Distance = Get_Tof_Dist(MagTof);
-      for (Distance > Mag_Distance){
+      for (Mag_Distance > Distance){
         PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
         ProxCounter = 1; //Reset the count to zero
         Get_Tof_Dist(MagTof);
