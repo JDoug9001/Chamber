@@ -6,7 +6,6 @@ Adafruit_VL53L0X lox2 = Adafruit_VL53L0X();
 void setup() {
   Serial.begin(115200);
   pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
 
   // wait until serial port opens for native USB devices
   while (! Serial) {
@@ -15,15 +14,14 @@ void setup() {
   
   Serial.println("Adafruit VL53L0X test");
   digitalWrite(12, LOW); //lox1 -> 0x29
-  digitalWrite(13, LOW); //lox2 -> 0x2A
-  delay(10);
-  digitalWrite(13, HIGH);
+  delay(100);
 
   // init lox2 
   if (!lox2.begin(0x2A)) { //init lox2 with 0x2A I2C addy
     Serial.println(F("Failed to boot VL53L0X_2"));
     while(1);
   }
+  delay(10);
   digitalWrite(12, HIGH); // enable lox1; done setting lox2 I2C addy
 
   // init lox1
