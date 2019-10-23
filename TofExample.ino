@@ -16,17 +16,12 @@ void setup() {
   }
   
   Serial.println("Adafruit VL53L0X test");
-  
   delay(500);
-
   lox2.init(true);
   lox2.setAddress(0x2A);
-
   delay(10);
   digitalWrite(12, HIGH); // enable lox1; done setting lox2 I2C addy
-
   lox1.init(true);
-
   Serial.println(F("VL53L0X API Simple Ranging example  using two sensors.\n\n")); 
 }
 
@@ -34,11 +29,9 @@ void setup() {
 void loop() {
   Serial.print("Reading lox1 measurement... ");
   Serial.print("Distance (mm): "); Serial.println(lox1.readRangeSingleMillimeters());
-  Serial.println(" out of range ");
 
   Serial.print("Reading lox2 measurement... ");
   Serial.print("Distance (mm): "); Serial.println(lox2.readRangeSingleMillimeters());
-  Serial.println(" out of range ");
     
   delay(100);
 }
