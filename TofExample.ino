@@ -10,7 +10,6 @@ void setup() {
   Wire.begin();
   Serial.begin(115200);
   
-
   // wait until serial port opens for native USB devices
   while (! Serial) {
     delay(1);
@@ -20,36 +19,25 @@ void setup() {
   
   delay(500);
 
-  // init lox2 
   lox2.init(true);
   lox2.setAddress(0x2A);
-  // if (!lox2.begin(0x2A)) { //init lox2 with 0x2A I2C addy
-  //   Serial.println(F("Failed to boot VL53L0X_2"));
-  //   while(1);
-  // }
+
   delay(10);
   digitalWrite(12, HIGH); // enable lox1; done setting lox2 I2C addy
 
-  // init lox1
-  // if (!lox1.begin()) { //init lox2 with 0x2A I2C addy
-  //   Serial.println(F("Failed to boot VL53L0X_1"));
-  //   while(1);
-  // }
   lox1.init(true);
-  //lox1.setAddress(0x2A);
 
-  // power 
   Serial.println(F("VL53L0X API Simple Ranging example  using two sensors.\n\n")); 
 }
 
 
 void loop() {
   Serial.print("Reading lox1 measurement... ");
-  Serial.print("Distance (mm): "); Serial.println(lox1.readRangeSingleMillimeters(););
+  Serial.print("Distance (mm): "); Serial.println(lox1.readRangeSingleMillimeters());
   Serial.println(" out of range ");
 
   Serial.print("Reading lox2 measurement... ");
-  Serial.print("Distance (mm): "); Serial.println(lox2.readRangeSingleMillimeters(););
+  Serial.print("Distance (mm): "); Serial.println(lox2.readRangeSingleMillimeters());
   Serial.println(" out of range ");
     
   delay(100);
