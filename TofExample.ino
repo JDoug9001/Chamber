@@ -17,11 +17,9 @@ void setup() {
   digitalWrite(12, LOW); //lox1 -> 0x29
   digitalWrite(13, LOW); //lox2 -> 0x2A
   delay(10);
-  digitalWrite(12, HIGH);
   digitalWrite(13, HIGH);
 
   // init lox2 
-  digitalWrite(12, LOW); // disable lox1 to set I2C addy of lox2
   if (!lox2.begin(0x2A)) { //init lox2 with 0x2A I2C addy
     Serial.println(F("Failed to boot VL53L0X_2"));
     while(1);
