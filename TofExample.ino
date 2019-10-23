@@ -44,23 +44,13 @@ void setup() {
 
 
 void loop() {
-  VL53L0X_RangingMeasurementData_t measure1;
-  VL53L0X_RangingMeasurementData_t measure2;
-    
   Serial.print("Reading lox1 measurement... ");
-  lox1.rangingTest(&measure1, false); // pass in 'true' to get debug data printout!
-  if (measure1.RangeStatus != 4) {  // phase failures have incorrect data
-    Serial.print("Distance (mm): "); Serial.println(measure1.RangeMilliMeter);
-  } else {
-    Serial.println(" out of range ");
-  }
+  Serial.print("Distance (mm): "); Serial.println(lox1.readRangeSingleMillimeters(););
+  Serial.println(" out of range ");
 
-  lox2.rangingTest(&measure2, false); // pass in 'true' to get debug data printout!
-  if (measure2.RangeStatus != 4) {  // phase failures have incorrect data
-    Serial.print("Distance (mm): "); Serial.println(measure2.RangeMilliMeter);
-  } else {
-    Serial.println(" out of range ");
-  }
+  Serial.print("Reading lox2 measurement... ");
+  Serial.print("Distance (mm): "); Serial.println(lox2.readRangeSingleMillimeters(););
+  Serial.println(" out of range ");
     
   delay(100);
 }
