@@ -3,14 +3,14 @@
 #include <RF24.h>
 #include "avr/interrupt.h" 
 
-#define button 4
+
 
 RF24 radio(7, 8); // CE, CSN
 const byte addresses[][6] = {"00001", "00002"};
-const byte IntPin1 = 4;
+const byte IntPin1 = 2;
 
 void setup() {
-  pinMode (IntPin1, INPUT_PULLUP);
+  pinMode (IntPin1, INPUT);
   attachInterrupt(digitalPinToInterrupt(IntPin1), MagTap_ISR, RISING);
   radio.begin();
   radio.openWritingPipe(addresses[1]); // 00002
