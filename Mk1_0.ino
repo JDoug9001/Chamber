@@ -1,7 +1,19 @@
 #include "avr/interrupt.h" 
-#include "Adafruit_VL53L0X.h"
+#include "VL53L0X.h"
+#include <Wire.h>
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+
+VL53L0X MagazineTof;
+VL53L0X SlideTof;
 
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+// wireless modules
+// https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4
+RF24 radio(7, 8); // CE, CSN
+const byte addresses[][6] = {"00001", "00002"};
 
 volatile int value=0;
 const byte Solenoid = 13;
@@ -10,11 +22,36 @@ const byte IntPin2 = 3;
 const byte IntPin3 =4;
 volatile byte state = 0;
 const byte SwitchFunctionButton = 10;
-volatile byte MagTof = 0;
-volatile byte SlideTof = 1;
+volatile byte MagTofPin = 0;
+volatile byte SlideTofPin = 1;
 int VibraSensPin = 6;
 
 void setup() {
+  // wireless module
+  radio.begin();
+  radio.openReadingPipe(1, addresses[1]); // 00002
+  radio.setPALevel(RF24_PA_MIN);
+
+  //Tof setup start
+  pinMode(12, OUTPUT);
+  digitalWrite(12, LOW); //MagazineTof -> 0x29
+  Wire.begin();
+  Serial.begin(115200);
+  
+  // wait until serial port opens for native USB devices
+  while (! Serial) {
+    delay(1);
+  }
+  
+  Serial.println("Adafruit VL53L0X test");
+  delay(500);
+  SlideTof.init(true);
+  SlideTof.setAddress(0x2A);
+  delay(10);
+  digitalWrite(12, HIGH); // enable MagazineTof; done setting SlideTof I2C addy
+  MagazineTof.init(true);
+  Serial.println(F("VL53L0X API Simple Ranging example  using two sensors.\n\n")); 
+//End Tof setup
 
   pinMode (solenoid, OUTPUT);
   pinMode (IntPin1, INPUT_PULLUP);
@@ -34,14 +71,13 @@ void setup() {
   int Timeout = 0; //
   int Mag_Distance = 20;
   int VibraSens = 0; 
+  byte MagButton = 0;
   
   // Inputs and Outputs
 
   pinMode (ProxState, INPUT_PULLUP); //current state of the Prox Sensor
-  pinMode (MagButton, INPUT); //Momentary push for mag "tap"
-  pinMode (SlideTof, INPUT); //SlideTOF sensor for distance shows slide distance from device
-  pinMode (MagTof_Remove, INPUT); //value for removing MagTof
-  pinMode (MagTof_Insert, INPUT); //value for Inserting MagTof Read the same pin for both magtof remove and insert
+  pinMode (SlideTofPin, INPUT); //Pin SlideTOF comes in on
+  pinMode (MagTofPin, INPUT); //Pin magtof comes in on
   pinMode (Solenoid, OUTPUT); //Solenoid to push the slide
   pinMode (SwitchFunctionButton, INPUT); //Button to switch between the three functions
   pinMode (Blue_Led_1, OUTPUT); //LED to indicate which function is being run
@@ -49,27 +85,22 @@ void setup() {
   pinMode (Blue_Led_3, OUTPUT); //LED to indicate which function is being run
   pinMode (RGB_Led, OUTPUT); //LED to indicate power level 
   pinMode (VibraSens, INPUT); //Motion switch to turn on 
-
-  Serial.begin(115200);
-
-  // wait until serial port opens for native USB devices
-  while (! Serial) {
-    delay(1);
-  }
-  
-  if (!lox.begin()) {
-    Serial.println(F("Failed to boot VL53L0X"));
-    while(1);
-  }
-  // power 
-  //Serial.println(F("VL53L0X API Simple Ranging example\n\n")); 
-
 } 
-}
-
 
 
 void loop() {
+  delay(5);
+  radio.stopListening();
+  delay(5);
+  radio.startListening();
+ if (radio.available()) {
+    char text[2] = "";
+    radio.read(&text, sizeof(text));
+    Serial.println(text);
+    MagButton = text[0];
+    delay(1000);
+  }
+}
 
 
 void Prox_ISR(){
@@ -124,23 +155,24 @@ void Reload_Mode(){
     Reload = 1;
     if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
       
-      Distance = Get_Tof_Dist(MagTof);
+      Distance = Get_Tof_Dist(MagazineTof);
       while (Distance < Mag_Distance){ // mag still in wait until it gets pulled
-        delay(1);
-        Distance = Get_Tof_Dist(MagTof);
+        delay(100);
+        Distance = Get_Tof_Dist(MagazineTof);
       }
 
-      Distance = Get_Tof_Dist(MagTof);
+      delay(100);
+      Distance = Get_Tof_Dist(MagazineTof);
       while (Distance > Mag_Distance){ // mag out, wait until it is replaced
-        delay(1);
-        Distance = Get_Tof_Dist(MagTof);
+        delay(100);
+        Distance = Get_Tof_Dist(MagazineTof);
       }
-      PrevRandomInt = RandInt; //Find a new random number ^look up at random function^
       ProxCounter = 1; //Reset the count to zero
       Reload = 0; //Reset Main interrupt 
     }
+  } else {
+    Cycle_Slide();
   }
-  Cycle_Slide();
 }
 
 
@@ -153,23 +185,26 @@ void Random_Mode(){
   //Stop main interrupt from functioning when the random number and counter number are the same
   if (ProxCounter == RandomInt){
     Malfunction = 1;    //In main interrupts Malfunction!=1
-    if (Malfunction = 1){ //If Momentary is pushed then Tof reaches certain distance go high then malfunction is reset to zero and then the cycle will continue to loop until 15 actuations are reached
-      digitalRead (MagButton); //"Mag" is tapped
-      if(MagButton == HIGH){
-        Get_Mag_Tof (SlideTof);
-        if (SlideTof> XXX){  //Tof sensor says slide was pulled back X distance ie racked. Solenoid is turned off 
-          Malfunction = 0;     //Malfunction is cleared
+    while (Malfunction == 1){ //If Momentary is pushed then Tof reaches certain distance go high then malfunction is reset to zero and then the cycle will continue to loop until 15 actuations are reached
+      if (MagButton == HIGH){
+        // tapped
+        Distance = Get_Tof_Dist(SlideTof);
+        while (Distance < XXX){  //Tof sensor says slide was pulled back X distance ie racked. Solenoid is turned off 
+          delay(100);
+          Distance = Get_Tof_Dist(SlideTof);
         }
+        // racked
+        Malfunction = 0;  //Malfunction is cleared
       } 
     }
   }
-}
   Reload_Mode();
+  PrevRandInt = RandomInt; //Find a new random number ^look up at random function^
 }
 
 
 void Cycle_Slide(){
-  if(Malfunction != 1)&&(Reload != 1){
+  if (Malfunction != 1) && (Reload != 1) {
     digitalWrite(Solenoid, HIGH);
     delay(500);
     digitalWrite(Solenoid, LOW);
@@ -178,95 +213,9 @@ void Cycle_Slide(){
 }
 
 
-int Get_Tof_Dist(int sensor) {
-  VL53L0X_RangingMeasurementData_t measure;
-    
+int Get_Tof_Dist(VL53L0X sensor) {
   Serial.print("Reading a measurement... ");
-  lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
-
-  if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
-  } else {
-    Serial.println(" out of range ");
-  }
-    
-  delay(100);
+  int dist = sensor.readRangeSingleMillimeters();
+  // delay(100);
+  return dist
 }
-
-//Wireless signal transmission/receiveing,  deepsleep and wake interrupt
-
-
-
-//Code for transmitter
-/*
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
-RF24 radio(9, 10); // CE, CSN         
-const byte address[6] = "00001";     //Byte of array representing the address. This is the address where we will send the data. This should be same on the receiving side.
-int button_pin = 2;
-boolean button_state = 0;
-void setup() {
-pinMode(button_pin, INPUT);
-radio.begin();                  //Starting the Wireless communication
-radio.openWritingPipe(address); //Setting the address where we will send the data
-radio.setPALevel(RF24_PA_MIN);  //You can set it as minimum or maximum depending on the distance between the transmitter and receiver.
-radio.stopListening();          //This sets the module as transmitter
-}
-void loop()
-{
-button_state = digitalRead(button_pin);
-if(button_state == HIGH)
-{
-const char text[] = "Your Button State is HIGH";
-radio.write(&text, sizeof(text));                  //Sending the message to receiver
-}
-else
-{
-const char text[] = "Your Button State is LOW";
-radio.write(&text, sizeof(text));                  //Sending the message to receiver 
-}
-radio.write(&button_state, sizeof(button_state));  //Sending the message to receiver 
-delay(1000);
-}
-*/
-
-//Code for receiver
-/*
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
-RF24 radio(9, 10); // CE, CSN
-const byte address[6] = "00001";
-boolean button_state = 0;
-int led_pin = 3;
-void setup() {
-pinMode(6, OUTPUT);
-Serial.begin(9600);
-radio.begin();
-radio.openReadingPipe(0, address);   //Setting the address at which we will receive the data
-radio.setPALevel(RF24_PA_MIN);       //You can set this as minimum or maximum depending on the distance between the transmitter and receiver.
-radio.startListening();              //This sets the module as receiver
-}
-void loop()
-{
-if (radio.available())              //Looking for the data.
-{
-char text[32] = "";                 //Saving the incoming data
-radio.read(&text, sizeof(text));    //Reading the data
-radio.read(&button_state, sizeof(button_state));    //Reading the data
-if(button_state == HIGH)
-{
-digitalWrite(6, HIGH);
-Serial.println(text);
-}
-else
-{
-digitalWrite(6, LOW);
-Serial.println(text);}
-}
-delay(5);
-} 
-*/
-
-// https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4
