@@ -16,7 +16,8 @@ RF24 radio(7, 8); // CE, CSN
 const byte addresses[][6] = {"00001", "00002"};
 
 volatile int value=0;
-const byte Solenoid = 13;
+const byte Solenoid = 13; //this is referencing the slide solenoid used for normal operation
+//const byte MagSolenoid = 14;  //This solenoid extends during reload sequence
 const byte IntPin1 = 2;
 const byte IntPin2 = 3;
 const byte IntPin3 =4;
@@ -53,7 +54,9 @@ void setup() {
   Serial.println(F("VL53L0X API Simple Ranging example  using two sensors.\n\n")); 
 //End Tof setup
 
+//WHY ARE SOME OF THESE REPEATED IN THE INPUTS AND OUTPUTS SECTION???
   pinMode (solenoid, OUTPUT);
+  //pinmode (MagSolenoid, OUTPUT);
   pinMode (IntPin1, INPUT_PULLUP);
   pinMode (IntPin2, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(IntPin1), Prox_ISR, RISING);
@@ -79,6 +82,7 @@ void setup() {
   pinMode (SlideTofPin, INPUT); //Pin SlideTOF comes in on
   pinMode (MagTofPin, INPUT); //Pin magtof comes in on
   pinMode (Solenoid, OUTPUT); //Solenoid to push the slide
+  //pinMode (MagSolenoid, OUTPUT); //Solenoid to extend/retract the magazine follower
   pinMode (SwitchFunctionButton, INPUT); //Button to switch between the three functions
   pinMode (Blue_Led_1, OUTPUT); //LED to indicate which function is being run
   pinMode (Blue_Led_2, OUTPUT); //LED to indicate which function is being run
@@ -153,6 +157,7 @@ void Mode_ISR(){
 void Reload_Mode(){
   if (ProxCounter == 15) {
     Reload = 1;
+    //digitalWrite(MagSolenoid, HIGH); //Extend mag follower solenoid
     if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
       
       Distance = Get_Tof_Dist(MagazineTof);
@@ -169,6 +174,7 @@ void Reload_Mode(){
       }
       ProxCounter = 1; //Reset the count to zero
       Reload = 0; //Reset Main interrupt 
+      //digitalWrite(MagSolenoid, LOW); //Retract mag follower
     }
   } else {
     Cycle_Slide();
