@@ -8,3 +8,4 @@ Uncommented/activated code for Magazine solenoid. The magazine solenoid will act
 
 Created wiring schematic for receiving signal from the prox sensor, and transmitting power to the slide solenoid. 
 
+Next goals: draw the schematic for transceivers setup before then and Im going to check on grab cad for tof sensor, (VL53L0x), Wireless transceivers, proximity sensor, grab cad look for files of the same.
