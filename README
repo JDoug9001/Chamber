@@ -1,0 +1,10 @@
+More detailed progress log 
+
+
+11.19.19
+General code house keeping
+
+Uncommented/activated code for Magazine solenoid. The magazine solenoid will active when the round count reaches 15. This will push the slide stop up so that when the magazine is removed the slide will still remain in its retracted state.
+
+Created wiring schematic for receiving signal from the prox sensor, and transmitting power to the slide solenoid. 
+
