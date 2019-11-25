@@ -1,0 +1,58 @@
+//Case one: 1 Blue LED Active. Continuous Function
+
+Trigger is pulled
+Prox sensor goes high and is counted
+Circuit is closed
+Slide Solenoid extends for half a second then retracts
+
+
+
+//Case Two: 2 Blue LEDs Active. Reload Function
+
+Trigger is pulled
+Prox sensor goes high and is counted
+Circuit is closed
+Slide Solenoid extends for XXX amount of time then retracts
+When Counter=15
+Slide needs to extend for longer so that the slide goes fully retracted
+
+Slide Sensor needs to hit XXX distance
+Magazine solenoid extends for short time
+(Magazine is removed)
+Distance is acquired from magazine sensor
+ (Magazine is reinserted)
+Distance is acquired from magazine sensor
+Prox Counter value is reset to zero
+
+
+
+
+
+//Case Three: 3 Blue LEDs Active. Malfunction
+
+Random Number is generated
+If same random number is repeated, a new one is generated
+Trigger is pulled
+Prox sensor goes high and is counted
+Circuit is closed
+Slide Solenoid extends for XXX amount of time then retracts
+When prox counter=random number
+Slide solenoid wont actuate
+Magazine baseplate button must be pressed
+
+Slide Sensor needs to hit XXX distance (Slide must be manually pulled)
+When slide Tof reaches certain distance, malfunction is reset to zero
+
+When Counter=15
+Slide needs to extend for longer so that the slide goes fully retracted
+
+Slide Sensor hits XXX distance
+Magazine solenoid extends for short time
+
+(Magazine is removed)
+Distance is acquired from magazine sensor
+(Magazine is reinserted)
+Distance is acquired from magazine sensor
+
+Prox Counter value is reset to zero
+Black text is already coded. Orange text may need its value modified. Grey text is internal things. Red text needs to be programmed.
