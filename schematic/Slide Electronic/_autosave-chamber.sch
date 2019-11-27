@@ -17,12 +17,12 @@ $EndDescr
 $Comp
 L Transistor_BJT:PN2222A Q?
 U 1 1 5DD49809
-P 3200 1750
-F 0 "Q?" H 3390 1796 50  0000 L CNN
-F 1 "PN2222A" H 3390 1705 50  0000 L CNN
-F 2 "Package_TO_SOT_THT:TO-92_Inline" H 3400 1675 50  0001 L CIN
-F 3 "http://www.fairchildsemi.com/ds/PN/PN2222A.pdf" H 3200 1750 50  0001 L CNN
-	1    3200 1750
+P 2650 1750
+F 0 "Q?" H 2840 1796 50  0000 L CNN
+F 1 "PN2222A" H 2840 1705 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 2850 1675 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/PN/PN2222A.pdf" H 2650 1750 50  0001 L CNN
+	1    2650 1750
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -50,12 +50,12 @@ $EndComp
 $Comp
 L Device:R R?
 U 1 1 5DD4B315
-P 2750 1750
-F 0 "R?" V 2543 1750 50  0000 C CNN
-F 1 "R" V 2634 1750 50  0000 C CNN
-F 2 "" V 2680 1750 50  0001 C CNN
-F 3 "~" H 2750 1750 50  0001 C CNN
-	1    2750 1750
+P 2200 1750
+F 0 "R?" V 1993 1750 50  0000 C CNN
+F 1 "R" V 2084 1750 50  0000 C CNN
+F 2 "" V 2130 1750 50  0001 C CNN
+F 3 "~" H 2200 1750 50  0001 C CNN
+	1    2200 1750
 	0    1    1    0   
 $EndComp
 $Comp
@@ -114,7 +114,7 @@ F 3 "~" H 7300 1800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3000 1750 2900 1750
+	2450 1750 2350 1750
 $Comp
 L power:VCC #PWR?
 U 1 1 5DD5080B
@@ -220,8 +220,6 @@ Wire Wire Line
 	7300 1650 7300 1400
 Wire Wire Line
 	6700 1400 7300 1400
-Wire Wire Line
-	7300 1400 7650 1400
 Connection ~ 7300 1400
 $Comp
 L power:VCC #PWR?
@@ -252,29 +250,29 @@ Wire Wire Line
 $Comp
 L pspice:INDUCTOR L?
 U 1 1 5DD632F6
-P 3300 1150
-F 0 "L?" V 3254 1228 50  0000 L CNN
-F 1 "Solenoid / actuator" V 3345 1228 50  0000 L CNN
-F 2 "" H 3300 1150 50  0001 C CNN
-F 3 "~" H 3300 1150 50  0001 C CNN
-	1    3300 1150
+P 2750 1150
+F 0 "L?" V 2704 1228 50  0000 L CNN
+F 1 "Solenoid / actuator" V 2795 1228 50  0000 L CNN
+F 2 "" H 2750 1150 50  0001 C CNN
+F 3 "~" H 2750 1150 50  0001 C CNN
+	1    2750 1150
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	3300 1400 3300 1550
+	2750 1400 2750 1550
 $Comp
 L power:GND #PWR?
 U 1 1 5DD64D74
-P 3300 2050
-F 0 "#PWR?" H 3300 1800 50  0001 C CNN
-F 1 "GND" H 3305 1877 50  0000 C CNN
-F 2 "" H 3300 2050 50  0001 C CNN
-F 3 "" H 3300 2050 50  0001 C CNN
-	1    3300 2050
+P 2750 2050
+F 0 "#PWR?" H 2750 1800 50  0001 C CNN
+F 1 "GND" H 2755 1877 50  0000 C CNN
+F 2 "" H 2750 2050 50  0001 C CNN
+F 3 "" H 2750 2050 50  0001 C CNN
+	1    2750 2050
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3300 2050 3300 1950
+	2750 2050 2750 1950
 $Comp
 L power:PWR_FLAG #FLG?
 U 1 1 5DD6685A
@@ -300,26 +298,20 @@ $EndComp
 $Comp
 L power:VDD #PWR?
 U 1 1 5DD6E1D7
-P 3300 800
-F 0 "#PWR?" H 3300 650 50  0001 C CNN
-F 1 "VDD" H 3317 973 50  0000 C CNN
-F 2 "" H 3300 800 50  0001 C CNN
-F 3 "" H 3300 800 50  0001 C CNN
-	1    3300 800 
+P 2750 800
+F 0 "#PWR?" H 2750 650 50  0001 C CNN
+F 1 "VDD" H 2767 973 50  0000 C CNN
+F 2 "" H 2750 800 50  0001 C CNN
+F 3 "" H 2750 800 50  0001 C CNN
+	1    2750 800 
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3300 800  3300 900 
+	2750 800  2750 900 
 Wire Wire Line
 	5150 1750 5350 1750
-Wire Wire Line
-	4850 1750 4700 1750
-Text Notes 4100 1700 0    50   ~ 0
-from prox sensor
 Text Notes 7650 1350 0    50   ~ 0
 to microcontroller
-Text Notes 1800 1700 0    50   ~ 0
-from microcontroller
 $Comp
 L custom:TOF_VL53L0X TOF?
 U 1 1 5DDF02A8
@@ -334,12 +326,12 @@ $EndComp
 $Comp
 L Switch:SW_Push SW?
 U 1 1 5DDF2A14
-P 7500 3550
-F 0 "SW?" H 7500 3835 50  0000 C CNN
-F 1 "SW_Push" H 7500 3744 50  0000 C CNN
-F 2 "" H 7500 3750 50  0001 C CNN
-F 3 "~" H 7500 3750 50  0001 C CNN
-	1    7500 3550
+P 1400 4150
+F 0 "SW?" H 1400 4435 50  0000 C CNN
+F 1 "SW_Push" H 1400 4344 50  0000 C CNN
+F 2 "" H 1400 4350 50  0001 C CNN
+F 3 "~" H 1400 4350 50  0001 C CNN
+	1    1400 4150
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
@@ -396,9 +388,166 @@ Wire Wire Line
 Wire Wire Line
 	5250 3800 5350 3800
 Wire Wire Line
-	2750 5150 1850 5150
+	7850 1400 7850 2700
 Wire Wire Line
-	1850 5150 1850 1750
+	7850 2700 2500 2700
 Wire Wire Line
-	1850 1750 2600 1750
+	2500 2700 2500 3950
+Wire Wire Line
+	2500 3950 2750 3950
+Wire Wire Line
+	7300 1400 7850 1400
+$Comp
+L custom:prox_sensor U?
+U 1 1 5DE038E4
+P 3900 1750
+F 0 "U?" H 3867 1335 50  0000 C CNN
+F 1 "prox_sensor" H 3867 1426 50  0000 C CNN
+F 2 "" H 3650 1750 50  0001 C CNN
+F 3 "" H 3650 1750 50  0001 C CNN
+	1    3900 1750
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1850 1750 2050 1750
+Wire Wire Line
+	4300 1750 4850 1750
+$Comp
+L power:VDD #PWR?
+U 1 1 5DE0E666
+P 4500 1850
+F 0 "#PWR?" H 4500 1700 50  0001 C CNN
+F 1 "VDD" H 4517 2023 50  0000 C CNN
+F 2 "" H 4500 1850 50  0001 C CNN
+F 3 "" H 4500 1850 50  0001 C CNN
+	1    4500 1850
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4500 1850 4300 1850
+$Comp
+L power:GND #PWR?
+U 1 1 5DE10F35
+P 4500 1650
+F 0 "#PWR?" H 4500 1400 50  0001 C CNN
+F 1 "GND" H 4505 1477 50  0000 C CNN
+F 2 "" H 4500 1650 50  0001 C CNN
+F 3 "" H 4500 1650 50  0001 C CNN
+	1    4500 1650
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4500 1650 4300 1650
+Wire Wire Line
+	1600 4150 2750 4150
+$Comp
+L power:GND #PWR?
+U 1 1 5DE16672
+P 1000 4150
+F 0 "#PWR?" H 1000 3900 50  0001 C CNN
+F 1 "GND" H 1005 3977 50  0000 C CNN
+F 2 "" H 1000 4150 50  0001 C CNN
+F 3 "" H 1000 4150 50  0001 C CNN
+	1    1000 4150
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	1200 4150 1000 4150
+$Comp
+L RF:NRF24L01 U?
+U 1 1 5DE18900
+P 1750 6750
+F 0 "U?" V 1750 6600 50  0000 L CNN
+F 1 "NRF24L01" V 1650 6450 50  0000 L CNN
+F 2 "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.5x2.5mm" H 1950 7550 50  0001 L CIN
+F 3 "http://www.nordicsemi.com/eng/content/download/2730/34105/file/nRF24L01_Product_Specification_v2_0.pdf" H 1750 6850 50  0001 C CNN
+	1    1750 6750
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	1950 6150 1950 4650
+Wire Wire Line
+	1950 4650 2750 4650
+Wire Wire Line
+	2250 6150 2250 4950
+Wire Wire Line
+	2250 4950 2750 4950
+Wire Wire Line
+	1750 6150 1750 4550
+Wire Wire Line
+	1750 4550 2750 4550
+Wire Wire Line
+	2050 6150 2050 5150
+Wire Wire Line
+	2050 5150 2750 5150
+Wire Wire Line
+	2150 6150 2150 5050
+Wire Wire Line
+	2150 5050 2750 5050
+Wire Wire Line
+	2550 6650 2700 6650
+Wire Wire Line
+	2700 6650 2700 6750
+Wire Wire Line
+	2700 6850 2600 6850
+Wire Wire Line
+	2550 6750 2700 6750
+Connection ~ 2700 6750
+Wire Wire Line
+	2700 6750 2700 6850
+Wire Wire Line
+	2700 6850 2700 6950
+Connection ~ 2700 6850
+$Comp
+L power:GND #PWR?
+U 1 1 5DE2B4F4
+P 2700 6950
+F 0 "#PWR?" H 2700 6700 50  0001 C CNN
+F 1 "GND" H 2705 6777 50  0000 C CNN
+F 2 "" H 2700 6950 50  0001 C CNN
+F 3 "" H 2700 6950 50  0001 C CNN
+	1    2700 6950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1250 6150 1250 6050
+Wire Wire Line
+	1250 6050 2700 6050
+Wire Wire Line
+	2700 6050 2700 6650
+Connection ~ 2700 6650
+Wire Wire Line
+	950  6650 850  6650
+Wire Wire Line
+	850  6650 850  6750
+Wire Wire Line
+	850  6950 950  6950
+Wire Wire Line
+	950  6850 850  6850
+Connection ~ 850  6850
+Wire Wire Line
+	850  6850 850  6950
+Wire Wire Line
+	850  6750 950  6750
+Connection ~ 850  6750
+Wire Wire Line
+	850  6750 850  6850
+Wire Wire Line
+	2250 7350 2250 7400
+Wire Wire Line
+	2250 7400 2600 7400
+Wire Wire Line
+	2600 7400 2600 6850
+Connection ~ 2600 6850
+Wire Wire Line
+	2600 6850 2550 6850
+NoConn ~ 1450 6150
+NoConn ~ 1650 6150
+NoConn ~ 1250 7350
+NoConn ~ 1450 7350
+NoConn ~ 1850 7350
+NoConn ~ 2050 7350
+Wire Wire Line
+	850  6550 850  6650
+Connection ~ 850  6650
 $EndSCHEMATC
