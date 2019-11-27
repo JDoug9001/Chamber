@@ -18,3 +18,8 @@ continued work on electrical schematic. Was unable to locate electronic cad file
 removed unused declarations. Cleanup, add grounds, schematics uploaded to git(now accessible)
 
 Now that all wiring diagrams are completed, the next step is to incorporate all of the present physical electronics into one circuit
+
+After that need to design PCB/ pick components/chips for custom PCB
+
+Then design custom PCB paths and order them
+
