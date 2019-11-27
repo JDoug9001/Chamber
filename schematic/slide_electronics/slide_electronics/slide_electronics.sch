@@ -310,8 +310,6 @@ Wire Wire Line
 	2750 800  2750 900 
 Wire Wire Line
 	5150 1750 5350 1750
-Text Notes 7650 1350 0    50   ~ 0
-to microcontroller
 $Comp
 L custom:TOF_VL53L0X TOF?
 U 1 1 5DDF02A8
@@ -380,11 +378,11 @@ $EndComp
 Wire Wire Line
 	2750 4350 2500 4350
 Wire Wire Line
-	2500 4350 2500 5750
+	2500 4350 2500 5850
 Wire Wire Line
-	2500 5750 5250 5750
+	2500 5850 5250 5850
 Wire Wire Line
-	5250 5750 5250 3800
+	5250 5850 5250 3800
 Wire Wire Line
 	5250 3800 5350 3800
 Wire Wire Line
@@ -583,4 +581,28 @@ Wire Wire Line
 	1850 4850 2750 4850
 Wire Wire Line
 	1850 1750 1850 4850
+Wire Wire Line
+	3150 5550 3150 5650
+Wire Wire Line
+	3150 5650 3250 5650
+Wire Wire Line
+	3250 5650 3250 5550
+Wire Wire Line
+	3350 5550 3350 5650
+Wire Wire Line
+	3350 5650 3250 5650
+Connection ~ 3250 5650
+$Comp
+L power:GND #PWR?
+U 1 1 5DDFB735
+P 3250 5700
+F 0 "#PWR?" H 3250 5450 50  0001 C CNN
+F 1 "GND" H 3400 5650 50  0000 C CNN
+F 2 "" H 3250 5700 50  0001 C CNN
+F 3 "" H 3250 5700 50  0001 C CNN
+	1    3250 5700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3250 5700 3250 5650
 $EndSCHEMATC
