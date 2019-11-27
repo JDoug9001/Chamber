@@ -22,7 +22,6 @@ const byte ProxSensorPin = 2;
 const byte ModeBtnPin = 3;
 const byte WakeSensorPin =4;
 volatile byte state = 0;
-const byte SwitchFunctionButton = 10;
 volatile byte MagTofPin = 0;
 volatile byte SlideTofPin = 1;
 volatile byte MagTofXShutPin = 5;
@@ -81,7 +80,6 @@ void setup() {
   pinMode (ProxState, INPUT_PULLUP); //current state of the Prox Sensor
   pinMode (SlideTofPin, INPUT); //Pin SlideTOF comes in on
   pinMode (MagTofPin, INPUT); //Pin magtof comes in on
-  pinMode (SwitchFunctionButton, INPUT); //Button to switch between the three functions
   pinMode (Blue_Led_1, OUTPUT); //LED to indicate which function is being run
   pinMode (Blue_Led_2, OUTPUT); //LED to indicate which function is being run
   pinMode (Blue_Led_3, OUTPUT); //LED to indicate which function is being run
