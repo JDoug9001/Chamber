@@ -15,4 +15,8 @@ Next goals: draw the schematic for transceivers setup before then and Im going t
 
 continued work on electrical schematic. Was unable to locate electronic cad files on grabcad so created custom tof sensor. Continued translating physical circuits to electrical schematic
 
+<<<<<<< Updated upstream
 removed unused declarations. Cleanup, add
+=======
+removed unused declarations. Receiver 
+>>>>>>> Stashed changes
