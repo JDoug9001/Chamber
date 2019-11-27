@@ -16,7 +16,7 @@ RF24 radio(7, 8); // CE, CSN
 const byte addresses[][6] = {"00001", "00002"};
 
 volatile int value=0;
-const byte Solenoid = 13; //this is referencing the slide solenoid used for normal operation
+const byte Solenoid = 10; //this is referencing the slide solenoid used for normal operation
 const byte MagSolenoid = 9;  //This solenoid extends during reload sequence
 const byte ProxSensorPin = 2;
 const byte ModeBtnPin = 3;
