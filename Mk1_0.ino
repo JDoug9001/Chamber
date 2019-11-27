@@ -18,9 +18,9 @@ const byte addresses[][6] = {"00001", "00002"};
 volatile int value=0;
 const byte Solenoid = 13; //this is referencing the slide solenoid used for normal operation
 const byte MagSolenoid = 9;  //This solenoid extends during reload sequence
-const byte IntPin1 = 2;
-const byte IntPin2 = 3;
-const byte IntPin3 =4;
+const byte ProxSensorPin = 2;
+const byte ModeBtnPin = 3;
+const byte WakeSensorPin =4;
 volatile byte state = 0;
 const byte SwitchFunctionButton = 10;
 volatile byte MagTofPin = 0;
@@ -57,11 +57,11 @@ void setup() {
 
   pinMode (Solenoid, OUTPUT);
   pinmode (MagSolenoid, OUTPUT);
-  pinMode (IntPin1, INPUT_PULLUP);
-  pinMode (IntPin2, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(IntPin1), Prox_ISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(IntPin2), Mode_ISR, RISING);
-  attachInterrupt(digitaPinToInterrupt(IntPin3), Vibra_ISR, CHANGE); 
+  pinMode (ProxSensorPin, INPUT_PULLUP);
+  pinMode (ModeBtnPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(ProxSensorPin), Prox_ISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(ModeBtnPin), Mode_ISR, RISING);
+  attachInterrupt(digitaPinToInterrupt(WakeSensorPin), Vibra_ISR, CHANGE); 
   // Variables 
 
   int ProxCounter = 1; // counter for the number of Prox Sensor        

@@ -1,0 +1,404 @@
+EESchema Schematic File Version 4
+LIBS:chamber-cache
+EELAYER 29 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Transistor_BJT:PN2222A Q?
+U 1 1 5DD49809
+P 3200 1750
+F 0 "Q?" H 3390 1796 50  0000 L CNN
+F 1 "PN2222A" H 3390 1705 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 3400 1675 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/PN/PN2222A.pdf" H 3200 1750 50  0001 L CNN
+	1    3200 1750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Transistor_BJT:PN2222A Q?
+U 1 1 5DD4A28E
+P 5550 1750
+F 0 "Q?" H 5740 1796 50  0000 L CNN
+F 1 "PN2222A" H 5740 1705 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 5750 1675 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/PN/PN2222A.pdf" H 5550 1750 50  0001 L CNN
+	1    5550 1750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Transistor_BJT:PN2222A Q?
+U 1 1 5DD4AA23
+P 6600 1750
+F 0 "Q?" H 6790 1796 50  0000 L CNN
+F 1 "PN2222A" H 6790 1705 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 6800 1675 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/PN/PN2222A.pdf" H 6600 1750 50  0001 L CNN
+	1    6600 1750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5DD4B315
+P 2750 1750
+F 0 "R?" V 2543 1750 50  0000 C CNN
+F 1 "R" V 2634 1750 50  0000 C CNN
+F 2 "" V 2680 1750 50  0001 C CNN
+F 3 "~" H 2750 1750 50  0001 C CNN
+	1    2750 1750
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5DD4C4DB
+P 5000 1750
+F 0 "R?" V 4793 1750 50  0000 C CNN
+F 1 "R" V 4884 1750 50  0000 C CNN
+F 2 "" V 4930 1750 50  0001 C CNN
+F 3 "~" H 5000 1750 50  0001 C CNN
+	1    5000 1750
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5DD4C824
+P 5650 1150
+F 0 "R?" H 5580 1104 50  0000 R CNN
+F 1 "R" H 5580 1195 50  0000 R CNN
+F 2 "" V 5580 1150 50  0001 C CNN
+F 3 "~" H 5650 1150 50  0001 C CNN
+	1    5650 1150
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5DD4CC57
+P 6700 1150
+F 0 "R?" H 6630 1104 50  0000 R CNN
+F 1 "R" H 6630 1195 50  0000 R CNN
+F 2 "" V 6630 1150 50  0001 C CNN
+F 3 "~" H 6700 1150 50  0001 C CNN
+	1    6700 1150
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5DD4D061
+P 6100 1550
+F 0 "R?" H 6030 1504 50  0000 R CNN
+F 1 "R" H 6030 1595 50  0000 R CNN
+F 2 "" V 6030 1550 50  0001 C CNN
+F 3 "~" H 6100 1550 50  0001 C CNN
+	1    6100 1550
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5DD4E411
+P 7300 1800
+F 0 "C?" H 7415 1846 50  0000 L CNN
+F 1 "C" H 7415 1755 50  0000 L CNN
+F 2 "" H 7338 1650 50  0001 C CNN
+F 3 "~" H 7300 1800 50  0001 C CNN
+	1    7300 1800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3000 1750 2900 1750
+$Comp
+L power:VCC #PWR?
+U 1 1 5DD5080B
+P 1200 2100
+F 0 "#PWR?" H 1200 1950 50  0001 C CNN
+F 1 "VCC" H 1217 2273 50  0000 C CNN
+F 2 "" H 1200 2100 50  0001 C CNN
+F 3 "" H 1200 2100 50  0001 C CNN
+	1    1200 2100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:PWR_FLAG #FLG?
+U 1 1 5DD511A1
+P 1200 2100
+F 0 "#FLG?" H 1200 2175 50  0001 C CNN
+F 1 "PWR_FLAG" H 1200 2273 50  0000 C CNN
+F 2 "" H 1200 2100 50  0001 C CNN
+F 3 "~" H 1200 2100 50  0001 C CNN
+	1    1200 2100
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5DD52510
+P 1200 1550
+F 0 "#PWR?" H 1200 1300 50  0001 C CNN
+F 1 "GND" H 1205 1377 50  0000 C CNN
+F 2 "" H 1200 1550 50  0001 C CNN
+F 3 "" H 1200 1550 50  0001 C CNN
+	1    1200 1550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:PWR_FLAG #FLG?
+U 1 1 5DD5393E
+P 1200 1550
+F 0 "#FLG?" H 1200 1625 50  0001 C CNN
+F 1 "PWR_FLAG" H 1200 1723 50  0000 C CNN
+F 2 "" H 1200 1550 50  0001 C CNN
+F 3 "~" H 1200 1550 50  0001 C CNN
+	1    1200 1550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6100 1400 6100 1350
+Wire Wire Line
+	6100 1350 5650 1350
+Wire Wire Line
+	5650 1350 5650 1550
+Wire Wire Line
+	6700 1300 6700 1400
+Wire Wire Line
+	5650 1300 5650 1350
+Connection ~ 5650 1350
+Connection ~ 6700 1400
+Wire Wire Line
+	6700 1400 6700 1550
+$Comp
+L power:GND #PWR?
+U 1 1 5DD5C2AB
+P 5650 2000
+F 0 "#PWR?" H 5650 1750 50  0001 C CNN
+F 1 "GND" H 5655 1827 50  0000 C CNN
+F 2 "" H 5650 2000 50  0001 C CNN
+F 3 "" H 5650 2000 50  0001 C CNN
+	1    5650 2000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5DD5E0BC
+P 6700 2000
+F 0 "#PWR?" H 6700 1750 50  0001 C CNN
+F 1 "GND" H 6705 1827 50  0000 C CNN
+F 2 "" H 6700 2000 50  0001 C CNN
+F 3 "" H 6700 2000 50  0001 C CNN
+	1    6700 2000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6100 1700 6100 1750
+Wire Wire Line
+	6100 1750 6400 1750
+Wire Wire Line
+	6700 1950 6700 2000
+Wire Wire Line
+	5650 1950 5650 2000
+$Comp
+L power:GND #PWR?
+U 1 1 5DD5FBC0
+P 7300 2000
+F 0 "#PWR?" H 7300 1750 50  0001 C CNN
+F 1 "GND" H 7305 1827 50  0000 C CNN
+F 2 "" H 7300 2000 50  0001 C CNN
+F 3 "" H 7300 2000 50  0001 C CNN
+	1    7300 2000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7300 2000 7300 1950
+Wire Wire Line
+	7300 1650 7300 1400
+Wire Wire Line
+	6700 1400 7300 1400
+Wire Wire Line
+	7300 1400 7650 1400
+Connection ~ 7300 1400
+$Comp
+L power:VCC #PWR?
+U 1 1 5DD60ACA
+P 5650 900
+F 0 "#PWR?" H 5650 750 50  0001 C CNN
+F 1 "VCC" H 5667 1073 50  0000 C CNN
+F 2 "" H 5650 900 50  0001 C CNN
+F 3 "" H 5650 900 50  0001 C CNN
+	1    5650 900 
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5DD61A87
+P 6700 900
+F 0 "#PWR?" H 6700 750 50  0001 C CNN
+F 1 "VCC" H 6717 1073 50  0000 C CNN
+F 2 "" H 6700 900 50  0001 C CNN
+F 3 "" H 6700 900 50  0001 C CNN
+	1    6700 900 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6700 900  6700 1000
+Wire Wire Line
+	5650 900  5650 1000
+$Comp
+L pspice:INDUCTOR L?
+U 1 1 5DD632F6
+P 3300 1150
+F 0 "L?" V 3254 1228 50  0000 L CNN
+F 1 "Solenoid / actuator" V 3345 1228 50  0000 L CNN
+F 2 "" H 3300 1150 50  0001 C CNN
+F 3 "~" H 3300 1150 50  0001 C CNN
+	1    3300 1150
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3300 1400 3300 1550
+$Comp
+L power:GND #PWR?
+U 1 1 5DD64D74
+P 3300 2050
+F 0 "#PWR?" H 3300 1800 50  0001 C CNN
+F 1 "GND" H 3305 1877 50  0000 C CNN
+F 2 "" H 3300 2050 50  0001 C CNN
+F 3 "" H 3300 2050 50  0001 C CNN
+	1    3300 2050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3300 2050 3300 1950
+$Comp
+L power:PWR_FLAG #FLG?
+U 1 1 5DD6685A
+P 1150 950
+F 0 "#FLG?" H 1150 1025 50  0001 C CNN
+F 1 "PWR_FLAG" H 1150 1123 50  0000 C CNN
+F 2 "" H 1150 950 50  0001 C CNN
+F 3 "~" H 1150 950 50  0001 C CNN
+	1    1150 950 
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:VDD #PWR?
+U 1 1 5DD677AE
+P 1150 950
+F 0 "#PWR?" H 1150 800 50  0001 C CNN
+F 1 "VDD" H 1167 1123 50  0000 C CNN
+F 2 "" H 1150 950 50  0001 C CNN
+F 3 "" H 1150 950 50  0001 C CNN
+	1    1150 950 
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VDD #PWR?
+U 1 1 5DD6E1D7
+P 3300 800
+F 0 "#PWR?" H 3300 650 50  0001 C CNN
+F 1 "VDD" H 3317 973 50  0000 C CNN
+F 2 "" H 3300 800 50  0001 C CNN
+F 3 "" H 3300 800 50  0001 C CNN
+	1    3300 800 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3300 800  3300 900 
+Wire Wire Line
+	5150 1750 5350 1750
+Wire Wire Line
+	4850 1750 4700 1750
+Text Notes 4100 1700 0    50   ~ 0
+from prox sensor
+Text Notes 7650 1350 0    50   ~ 0
+to microcontroller
+Text Notes 1800 1700 0    50   ~ 0
+from microcontroller
+$Comp
+L custom:TOF_VL53L0X TOF?
+U 1 1 5DDF02A8
+P 5850 3600
+F 0 "TOF?" H 6028 3696 50  0000 L CNN
+F 1 "TOF_VL53L0X" H 6028 3605 50  0000 L CNN
+F 2 "" H 5850 3600 50  0001 C CNN
+F 3 "" H 5850 3600 50  0001 C CNN
+	1    5850 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Switch:SW_Push SW?
+U 1 1 5DDF2A14
+P 7500 3550
+F 0 "SW?" H 7500 3835 50  0000 C CNN
+F 1 "SW_Push" H 7500 3744 50  0000 C CNN
+F 2 "" H 7500 3750 50  0001 C CNN
+F 3 "~" H 7500 3750 50  0001 C CNN
+	1    7500 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3350 3300 5350 3300
+Wire Wire Line
+	5350 3400 4200 3400
+Wire Wire Line
+	4200 3400 4200 3550
+$Comp
+L power:GND #PWR?
+U 1 1 5DDF6084
+P 4200 3550
+F 0 "#PWR?" H 4200 3300 50  0001 C CNN
+F 1 "GND" H 4205 3377 50  0000 C CNN
+F 2 "" H 4200 3550 50  0001 C CNN
+F 3 "" H 4200 3550 50  0001 C CNN
+	1    4200 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5350 3500 4400 3500
+Wire Wire Line
+	4400 3500 4400 4950
+Wire Wire Line
+	4300 4850 4300 3600
+Wire Wire Line
+	4300 3600 5350 3600
+NoConn ~ 5350 3700
+Wire Wire Line
+	3350 3450 3350 3300
+Wire Wire Line
+	4400 4950 3750 4950
+Wire Wire Line
+	3750 4850 4300 4850
+$Comp
+L MCU_Module:Arduino_UNO_R2 A?
+U 1 1 5DDECE99
+P 3250 4450
+F 0 "A?" H 3550 3400 50  0000 C CNN
+F 1 "Arduino_UNO_R2" V 3250 4500 50  0000 C CNN
+F 2 "Module:Arduino_UNO_R2" H 3400 3400 50  0001 L CNN
+F 3 "https://www.arduino.cc/en/Main/arduinoBoardUno" H 3050 5500 50  0001 C CNN
+	1    3250 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2750 4350 2500 4350
+Wire Wire Line
+	2500 4350 2500 5750
+Wire Wire Line
+	2500 5750 5250 5750
+Wire Wire Line
+	5250 5750 5250 3800
+Wire Wire Line
+	5250 3800 5350 3800
+Wire Wire Line
+	2750 5150 1850 5150
+Wire Wire Line
+	1850 5150 1850 1750
+Wire Wire Line
+	1850 1750 2600 1750
+$EndSCHEMATC
