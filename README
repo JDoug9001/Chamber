@@ -23,3 +23,9 @@ After that need to design PCB/ pick components/chips for custom PCB
 
 Then design custom PCB paths and order them
 
+
+
+12.4.19
+Pins are incorrect on magazine schematic.
+slide schematic altered to correct pin assignments 
+TLDR got code to compile in arduino. Next steps add serial printf statements for debugging
