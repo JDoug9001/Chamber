@@ -22,6 +22,9 @@ const byte ProxSensorPin = 1;
 const byte ModeBtnPin = 3;
 const byte MagTofXShutPin = 5;
 //volatile int WakeSensPin = 4;
+const byte NUM_BULLETS = 17;
+const byte SHORT_ENCODER_STEPS = 1;
+const byte LONG_ENCODER_STEPS = 4 * SHORT_ENCODER_STEPS;
 volatile int Blue_Led_1=0;
 volatile int Blue_Led_2=6;
 volatile int Blue_Led_3=9;
@@ -48,16 +51,12 @@ int Get_Tof_Dist(VL53L0X sensor) {
 }
 
 void Cycle_Slide(){
-  if ((Malfunction != 1) && (Reload != 1)) {
-    digitalWrite(Solenoid, HIGH);
-    delay(500);
-    digitalWrite(Solenoid, LOW);
-    delay(500);
-  } 
+  // push_motor(SHORT_ENCODER_STEPS); // push motor X steps
+  // motor_return_home();
 }
 
 void Reload_Mode(){
-  if (ProxCounter == 15) {
+  if (ProxCounter == NUM_BULLETS) {
     Reload = 1;
  //   digitalWrite(MagSolenoid, HIGH); //Extend mag follower solenoid
     if (Reload == 1){ //Tof Sensor on top of Mag compares distance value. When the distance increases (the mag has been dropped) the loop finds a new number, ProxCounter resets. When the distance decreases (the mag has been reinserted) the reload is reset to zero. 
@@ -81,14 +80,14 @@ void Reload_Mode(){
   } else {
     Cycle_Slide();
   }
-}
+} 
 
 
 void Random_Mode(){
   //Generate a random number. If it's that same as the previous number, generate a new number
-  RandomInt = random(16); //Random number between 0-15
+  RandomInt = random(NUM_BULLETS+1); //Random number between 0-NUM_BULLETS
   while(RandomInt == PrevRandInt){
-    RandomInt = random(16); //Random number between 0-15
+    RandomInt = random(NUM_BULLETS+1); //Random number between 0-NUM_BULLETS
   }
   //Stop main interrupt from functioning when the random number and counter number are the same
   if (ProxCounter == RandomInt){
@@ -127,6 +126,9 @@ void setup() {
   Wire.begin();
   Serial.begin(115200);
   
+
+ // hello world
+
   // wait until serial port opens for native USB devices
   while (! Serial) {
     delay(1);
