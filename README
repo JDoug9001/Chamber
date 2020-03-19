@@ -29,3 +29,20 @@ Then design custom PCB paths and order them
 Pins are incorrect on magazine schematic.
 slide schematic altered to correct pin assignments 
 TLDR got code to compile in arduino. Next steps add serial printf statements for debugging
+
+
+///////////////////////////////////////////////////////////
+A A R O N    T O D O
+///////////////////////////////////////////////////////////
+1. get long press of mag button to reset the count.
+2. chicken or egg problem with reading from epron number of shots on the magazine side.
+3. finish code
+4. sleep mode
+5. h-bridge with motor
+
+extra credit
+6. 14 leds on mag to show bullets left in mag
+7. recharging circuit
+
+
+- order 2 unos from amazon
