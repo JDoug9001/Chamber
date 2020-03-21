@@ -7,12 +7,12 @@
 
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
-const byte Acknowledge[3] = "OK"
-volatile byte CurrentMagSerialNumber[17]; // 16 length hex string. each char one of [0123456789ABCDEF]
+const char Acknowledge[3] = "OK";
+const char CurrentMagSerialNumber[17]; // 16 length hex string. each char one of [0123456789ABCDEF]
 volatile byte BulletsUsed; //todo read from eprom
 
 void setup() {
-  pinMode (IntPin1, INPUT);
+  Serial.begin(9600);
   radio.begin();
 }
 
@@ -36,7 +36,8 @@ void loop() {
   while (true) {
     if (radio.available()) {
       radio.read(&CurrentMagSerialNumber, sizeof(CurrentMagSerialNumber));
-      Serial.println("got serial number of " + text);
+      Serial.print("2 received serial number: ");
+      Serial.println(CurrentMagSerialNumber);
       break;
     }
   }
@@ -44,11 +45,13 @@ void loop() {
   while (true) {
     if (radio.available()) {
       radio.read(&BulletsUsed, sizeof(BulletsUsed));
-      Serial.println("got number bullets used " + text);
+      Serial.print("4 received number bullets used: ");
+      Serial.println(BulletsUsed);
       break;
     }
   }
   startTransmitter();
-  Serial.println("sending ack " + Acknowledge);
+  Serial.print("5 sending ack: ");
+  Serial.println(Acknowledge);
   radio.write(&Acknowledge, sizeof(Acknowledge));
 }

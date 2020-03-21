@@ -8,12 +8,14 @@
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
 const byte IntPin1 = 2;
-const string SerialNumber = "0000000000000001" // 16 length hex string. each char one of [0123456789ABCDEF]
+const char SerialNumber[17] = "0000000000000001"; // 16 length hex string. each char one of [0123456789ABCDEF]
 volatile byte BulletsUsed = 0; //todo read from eprom
 
 void setup() {
+  Serial.begin(9600);
+  Serial.println("0 waiting for button press...");
   pinMode (IntPin1, INPUT);
-  attachInterrupt(digitalPinToInterrupt(IntPin1), MagButtonISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(IntPin1), MagButtonISR, FALLING);
   radio.begin();
 }
 
@@ -36,18 +38,27 @@ void loop() {}
 
 
 void MagButtonISR(){
+  pinMode (IntPin1, OUTPUT);
   bool acknowledged = false;
   startTransmitter();
+  delay(1);
+  Serial.print("1 sending serial number: ");
+  Serial.println(SerialNumber);
   radio.write(&SerialNumber, sizeof(SerialNumber));
+
+  Serial.print("3 sending number bullets used: ");
+  Serial.println(BulletsUsed);
   radio.write(&BulletsUsed, sizeof(BulletsUsed));
+  //delay(200);
   startReceiver();
 
   while (true) {
     if (radio.available()) {
-      char text[32] = "";
+      char text[3] = "";
       radio.read(&text, sizeof(text));
-      Serial.println("got response of " + text);
-      if (text == 'OK'){
+      Serial.print("6 received ack: ");
+      Serial.println(text);
+      if (!strcmp(text, "OK")){
         acknowledged = true;
         break;
       }
@@ -55,4 +66,6 @@ void MagButtonISR(){
   }
   // other stuff later
   sei();
+  pinMode (IntPin1, INPUT);
+  Serial.println("7 back to waiting for button press...");
 }
