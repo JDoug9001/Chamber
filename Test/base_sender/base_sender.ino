@@ -38,6 +38,7 @@ void loop() {}
 
 
 void MagButtonISR(){
+  Serial.println("0.5 Button Pressed");
   pinMode (IntPin1, OUTPUT);
   bool acknowledged = false;
   startTransmitter();
