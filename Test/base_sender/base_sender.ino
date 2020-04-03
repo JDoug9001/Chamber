@@ -12,14 +12,22 @@ const byte MagButtonPin = 2;
 const char SerialNumber[17] = "0000000000000001"; // 16 length hex string. each char one of [0123456789ABCDEF]
 volatile byte BulletsUsed; // = 0;
 volatile int BulletsUsedEepromAddress = 0;
+volatile bool acknowledged = true;
+volatile bool buttonPressed = false;
 
 void setup() {
+//  initEeprom();
   Serial.begin(9600);
   Serial.println("0 waiting for button press...");
   pinMode (MagButtonPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(MagButtonPin), MagButtonISR, FALLING);
   radio.begin();
   //todo: go to sleep
+}
+
+
+void initEeprom(){
+  EEPROM.update(BulletsUsedEepromAddress, 0);  
 }
 
 
@@ -61,22 +69,33 @@ char* readAck(){
 }
 
 
-bool waitForAck(){
-  bool acknowledged = false;
+void waitForAck(){
   unsigned long startMillis = millis();
   while (!acknowledged && millis() - startMillis < ACK_WAIT_TIME) { // while 2 seconds isnt up and not ack'd
     if (radio.available()) {
-      if (!strcmp(readAck(), "OK")){ 
+      if (strcmp(readAck(), "OK")){ 
         acknowledged = true; 
         break;
       }
     }
   }
-  return acknowledged;
 }
 
 
-void loop() {}
+void loop() {
+  if (buttonPressed && !acknowledged){
+    waitForAck();
+    waitForMagButtonPress();
+    //todo: if not ack'd, go back to sleep
+  }
+}
+
+
+void waitForMagButtonPress(){
+  buttonPressed = false;
+  pinMode (MagButtonPin, INPUT);
+  Serial.println("7 back to waiting for button press...");
+}
 
 
 // todo:
@@ -86,21 +105,23 @@ void loop() {}
 // }
 
 
+void interruptSetup(){
+  buttonPressed = true;
+  Serial.println("0.5 Button Pressed");
+  pinMode (MagButtonPin, OUTPUT);
+  acknowledged = false;
+}
+
+
 void MagButtonISR(){
   //todo: wake from  sleep
   //todo: check for long press with a while and a transmitSerialNumber
   //todo: decide how to proceed if button was long pressed
-  Serial.println("0.5 Button Pressed");
-  pinMode (MagButtonPin, OUTPUT);
-  bool ack = false;
+  interruptSetup();
   startTransmitter();
   delay(1);
   transmitSerialNumber();
   transmitNumberBulletsUsed();
   startReceiver();
-  ack = waitForAck();
   sei();
-  pinMode (MagButtonPin, INPUT);
-  Serial.println("7 back to waiting for button press...");
-  //todo: if not ack'd, go back to sleep
 }
