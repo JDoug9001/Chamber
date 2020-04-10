@@ -2,32 +2,77 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 #include "avr/interrupt.h" 
+#include "avr/sleep.h" 
 #include <EEPROM.h>
 
 
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
+const int SLEEP_TIME_MS = 50;
 const int ACK_WAIT_TIME = 2000;
+const int LONG_PRESS_TIME = 3000;
 const byte MagButtonPin = 2;
+const byte RadioBufferPin = 3;
 const char SerialNumber[17] = "0000000000000001"; // 16 length hex string. each char one of [0123456789ABCDEF]
-volatile byte BulletsUsed; // = 0;
+volatile byte BulletsUsed;
 volatile int BulletsUsedEepromAddress = 0;
 volatile bool acknowledged = true;
-volatile bool buttonPressed = false;
+volatile bool buttonPressed;
+
 
 void setup() {
-//  initEeprom();
   Serial.begin(9600);
-  Serial.println("0 waiting for button press...");
-  pinMode (MagButtonPin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(MagButtonPin), MagButtonISR, FALLING);
+  getEepromBulletsUsed();
+  initEeprom();
+  waitForMagButtonPress();
+  pinMode(RadioBufferPin, INPUT);
+  configureInterrupts();
+  configureRadio();
+  // goToSleep();
+}
+
+
+void configureRadio(){
   radio.begin();
-  //todo: go to sleep
+  radio.maskIRQ(1,1,0); //mask all IRQ triggers except for receive (1 is mask, 0 is no mask)
+}
+
+
+void configureInterrupts(){
+  attachMagBttnIntrpt();
+  attachRdoBffrIntrpt();
+}
+
+
+void attachMagBttnIntrpt(){
+  attachInterrupt(digitalPinToInterrupt(MagButtonPin), MagButtonISR, FALLING);
+}
+
+
+void attachRdoBffrIntrpt(){
+  attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
+}
+
+
+void detachRdoBffrIntrpt(){
+  detachInterrupt(digitalPinToInterrupt(RadioBufferPin));
 }
 
 
 void initEeprom(){
-  EEPROM.update(BulletsUsedEepromAddress, 0);  
+  // if eeprom reads 255, this is a brand new chip - set the count to zero
+  if (BulletsUsed == 0xFF)
+  {
+    setEepromBulletsUsed(0);
+  }
+}
+
+
+void setEepromBulletsUsed(byte numBulletsUsed){
+  BulletsUsed = numBulletsUsed;
+  Serial.print("Setting bullets used in the EEPROM to ");
+  Serial.println(BulletsUsed);
+  EEPROM.update(BulletsUsedEepromAddress, BulletsUsed);  
 }
 
 
@@ -52,10 +97,17 @@ void transmitSerialNumber(){
 }
 
 
+void getEepromBulletsUsed(){
+  BulletsUsed = EEPROM.read(BulletsUsedEepromAddress);
+  Serial.print("Read number of bullets used from EEPROM as: ");
+  Serial.println(BulletsUsed);
+  return BulletsUsed;
+}
+
+
 void transmitNumberBulletsUsed(){
   Serial.print("3 sending number bullets used: ");
-  BulletsUsed = EEPROM.read(BulletsUsedEepromAddress);
-  Serial.println(BulletsUsed);
+  getEepromBulletsUsed();
   radio.write(&BulletsUsed, sizeof(BulletsUsed));
 }
 
@@ -70,6 +122,7 @@ char* readAck(){
 
 
 void waitForAck(){
+  detachRdoBffrIntrpt();
   unsigned long startMillis = millis();
   while (!acknowledged && millis() - startMillis < ACK_WAIT_TIME) { // while 2 seconds isnt up and not ack'd
     if (radio.available()) {
@@ -79,6 +132,7 @@ void waitForAck(){
       }
     }
   }
+  attachRdoBffrIntrpt();
 }
 
 
@@ -86,7 +140,9 @@ void loop() {
   if (buttonPressed && !acknowledged){
     waitForAck();
     waitForMagButtonPress();
-    //todo: if not ack'd, go back to sleep
+    if (!acknowledged){
+      // goToSleep();
+    }
   }
 }
 
@@ -94,15 +150,40 @@ void loop() {
 void waitForMagButtonPress(){
   buttonPressed = false;
   pinMode (MagButtonPin, INPUT);
-  Serial.println("7 back to waiting for button press...");
+  Serial.println("0 waiting for button press...");
 }
 
 
-// todo:
-// void receiveBulletsUsedUpdate(){
-//   // get value from radio transmission
-//   EEPROM.update(BulletsUsedEepromAddress, value)
-// }
+void goToSleep(){
+  sleep_enable();
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+  Serial.println("Going to sleep.");
+  sleep_cpu();
+}
+
+
+void wakeUp(){
+  Serial.println("Woke up from sleep.");
+  sleep_disable();
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+
+void receiveBulletsUsedUpdate(){
+  char value = readRadioBuffer();
+  Serial.print("Received number of bullets used from the chamber: ");
+  Serial.println(value);
+  EEPROM.update(BulletsUsedEepromAddress, value);
+}
+
+
+char readRadioBuffer(){
+  char* val[1];
+  radio.read(&val, sizeof(val));
+  return val;
+}
 
 
 void interruptSetup(){
@@ -113,15 +194,46 @@ void interruptSetup(){
 }
 
 
+bool isLongPress(){
+  bool longPressed = true;
+  for (int i = 0; (i * SLEEP_TIME_MS) < LONG_PRESS_TIME; i++) { // while 2 seconds isnt up and not ack'd
+    delay(SLEEP_TIME_MS);
+    // if magButtonInput goes high, button was released
+    if (digitalRead(MagButtonPin)){
+      longPressed = false;
+      break;
+    }
+    Serial.print("milliseconds that have passed while button held: ");
+    Serial.println(i * SLEEP_TIME_MS);
+  } 
+  return longPressed;
+}
+
+
+void handleLongPress(bool longPressed){
+  if (longPressed)
+  {
+    Serial.println("Detected long press of mag button.");
+    setEepromBulletsUsed(0);
+  }
+}
+
+
 void MagButtonISR(){
-  //todo: wake from  sleep
-  //todo: check for long press with a while and a transmitSerialNumber
-  //todo: decide how to proceed if button was long pressed
+  // wakeUp();
+  handleLongPress(isLongPress());
   interruptSetup();
   startTransmitter();
   delay(1);
   transmitSerialNumber();
   transmitNumberBulletsUsed();
   startReceiver();
+  sei();
+}
+
+
+void RadioBufferISR(){
+  // wakeUp();
+  receiveBulletsUsedUpdate();
   sei();
 }
