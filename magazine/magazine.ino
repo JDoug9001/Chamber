@@ -1,86 +1,215 @@
-#include <Wire.h>
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+#include "avr/interrupt.h" 
+#include "avr/sleep.h" 
+#include <EEPROM.h>
 
 
-// define variables
-volatile int number_shots_fired;
-const int ACK_TIME = 1000;
+RF24 radio(7, 8); // CE, CSN
+const byte address[6] = "00001";
+const int LOOP_TIME_MS = 75;
+const byte MAX_NUM_BULLETS = 0x11; // 17 in decimal
+const byte DEFAULT_ROUNDS_USED = 0x00; 
+const int ACK_WAIT_TIME = 2000;
+const int LONG_PRESS_TIME = 3000;
+const byte MagButtonPin = 2;
+const byte RadioBufferPin = 3;
+const char SerialNumber[17] = "0000000000000001"; // 16 length hex string. each char one of [0123456789ABCDEF]
+volatile byte BulletsUsed;
+volatile int BulletsUsedEepromAddress = 0;
+volatile bool buttonPressed;
 
-// mag button press interrupts sleep
-void mag_button_interrupt(){
-     // if the hall effect sensor is close to metal
-     if (hall_effect_sensor.read()){
-          // send device name and current_bullets_used to barrell
-          send_greeting();
-          if (!is_acknowledged(ACK_TIME)){
-               go_to_sleep();
-          }
-     }
+
+void setup() {
+  Serial.begin(9600);
+  getEepromBulletsUsed();
+  initEeprom();
+  waitForMagButtonPress();
+  configurePins();
+  configureInterrupts();
+  configureRadio();
+  goToSleep();
+}
+
+void configurePins(){
+  pinMode(MagButtonPin, INPUT);
+  pinMode(RadioBufferPin, INPUT);
 }
 
 
-
-bool is_acknowledged(int wait_ms){
-     bool ack = false;
-     int elapsed_t = 0;
-     // while not acknowledged and time not expired
-     while (!ack & wait_ms < elapsed_t){
-          // wait a ms
-          delay(1);
-          ++elapsed_t;
-     }
-     return  ack;        
+void configureRadio(){
+  radio.begin();
+  radio.maskIRQ(1,1,0); //mask all IRQ triggers except for receive (1 is mask, 0 is no mask)
 }
 
 
-
-void send_greeting(){
-     char name[] = "0123456789ABCDEF";
-     // read stored variable shots_fired
-     number_shots_fired = read_shots_from_eprom();
-     tx_data_string(name);
-     tx_data_int(number_shots_fired);
+void configureInterrupts(){
+  attachMagBttnIntrpt();
+  attachRdoBffrIntrpt();
 }
 
 
-int read_shots_from_eprom(){
-     return 0; //TODO: fix this function to actually work
+void attachMagBttnIntrpt(){
+  attachInterrupt(digitalPinToInterrupt(MagButtonPin), MagButtonISR, FALLING);
 }
 
 
-go_to_sleep(){
-     // TODO: put microncontroler to sleep
+void attachRdoBffrIntrpt(){
+  attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
 }
 
 
-
-void received_message_ISR(){
-     //figure this part out
+void detachRdoBffrIntrpt(){
+  detachInterrupt(digitalPinToInterrupt(RadioBufferPin));
 }
 
 
-
-
-
-void tx_data_string(name){
-     // for loop to send a char[] (a bunch of chars)
+void initEeprom(){
+  // if eeprom reads out of normal range, this is a brand new chip - set the count to zero
+  if (BulletsUsed > MAX_NUM_BULLETS)
+  {
+    setEepromBulletsUsed(DEFAULT_ROUNDS_USED);
+  }
 }
 
 
-
-void tx_data_int(number_shots_fired){
-     // send an int
+void setEepromBulletsUsed(byte numBulletsUsed){
+  BulletsUsed = numBulletsUsed;
+  Serial.print("Setting bullets used in the EEPROM to ");
+  Serial.println(BulletsUsed);
+  EEPROM.update(BulletsUsedEepromAddress, BulletsUsed);  
 }
 
 
+void startReceiver(){
+  radio.openReadingPipe(0, address);;
+  radio.setPALevel(RF24_PA_MIN);
+  radio.startListening();
+}
 
 
-
-// communication interrupt - either set_mag_count or an ack
-if the incoming transmission is setting the number of  bullets
-     current_bullets_used = barrell_bullet_count
-else
-     ack = true;
-
+void startTransmitter(){
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
+}
 
 
-//TODO: long press of mag button causes bullet count to reset to 0.
+void transmitSerialNumber(){
+  Serial.print("1 sending serial number: ");
+  Serial.println(SerialNumber);
+  radio.write(&SerialNumber, sizeof(SerialNumber));
+}
+
+
+void getEepromBulletsUsed(){
+  BulletsUsed = EEPROM.read(BulletsUsedEepromAddress);
+  Serial.print("Read number of bullets used from EEPROM as: ");
+  Serial.println(BulletsUsed);
+  return BulletsUsed;
+}
+
+
+void transmitNumberBulletsUsed(){
+  Serial.print("3 sending number bullets used: ");
+  getEepromBulletsUsed();
+  radio.write(&BulletsUsed, sizeof(BulletsUsed));
+}
+
+
+void loop() {
+  if (buttonPressed){
+    // waitForAck();
+    waitForMagButtonPress();
+    delay(100);
+    goToSleep();
+  }
+}
+
+
+void waitForMagButtonPress(){
+  buttonPressed = false;
+  Serial.println("0 waiting for button press...");
+}
+
+
+void goToSleep(){
+  sleep_enable();
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  digitalWrite(LED_BUILTIN, LOW);
+  Serial.println("Going to sleep.");
+  delay(1000);
+  sleep_cpu();
+}
+
+
+void wakeUp(){
+  Serial.println("Woke up from sleep.");
+  sleep_disable();
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+
+void receiveBulletsUsedUpdate(){
+  readRadioBuffer();
+  Serial.print("Received number of bullets used from the chamber: ");
+  Serial.println(BulletsUsed);
+  setEepromBulletsUsed(BulletsUsed);
+}
+
+
+char readRadioBuffer(){
+  radio.read(&BulletsUsed, sizeof(BulletsUsed));
+  return BulletsUsed;
+}
+
+
+void MagButtonIsrSetup(){
+  buttonPressed = true;
+  Serial.println("0.5 Button Pressed");
+}
+
+
+bool isLongPress(){
+  bool longPressed = true;
+  for (int i = 0; (i * LOOP_TIME_MS) < LONG_PRESS_TIME; i++) { // while 2 seconds isnt up and not ack'd
+    // Serial.println(digitalRead(MagButtonPin));
+    Serial.print("milliseconds that have passed while button held: ");
+    Serial.println(i * LOOP_TIME_MS);
+    if (digitalRead(MagButtonPin)){ // if magButtonInput goes high, button was released
+      longPressed = false;
+      break;
+    }
+  } 
+  return longPressed;
+}
+
+
+void handleLongPress(bool longPressed){
+  if (longPressed)
+  {
+    Serial.println("Detected long press of mag button.");
+    setEepromBulletsUsed(DEFAULT_ROUNDS_USED);
+  }
+}
+
+
+void MagButtonISR(){
+  wakeUp();
+  handleLongPress(isLongPress());
+  MagButtonIsrSetup();
+  startTransmitter();
+  delay(1);
+  transmitSerialNumber();
+  transmitNumberBulletsUsed();
+  startReceiver();
+  sei();
+}
+
+
+void RadioBufferISR(){
+  wakeUp();
+  receiveBulletsUsedUpdate();
+  sei();
+}

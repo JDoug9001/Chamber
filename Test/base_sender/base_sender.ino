@@ -8,7 +8,9 @@
 
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
-const int SLEEP_TIME_MS = 50;
+const int LOOP_TIME_MS = 75;
+const byte MAX_NUM_BULLETS = 0x11; // 17 in decimal
+const byte DEFAULT_ROUNDS_USED = 0x00; 
 const int ACK_WAIT_TIME = 2000;
 const int LONG_PRESS_TIME = 3000;
 const byte MagButtonPin = 2;
@@ -16,7 +18,6 @@ const byte RadioBufferPin = 3;
 const char SerialNumber[17] = "0000000000000001"; // 16 length hex string. each char one of [0123456789ABCDEF]
 volatile byte BulletsUsed;
 volatile int BulletsUsedEepromAddress = 0;
-volatile bool acknowledged = true;
 volatile bool buttonPressed;
 
 
@@ -25,10 +26,15 @@ void setup() {
   getEepromBulletsUsed();
   initEeprom();
   waitForMagButtonPress();
-  pinMode(RadioBufferPin, INPUT);
+  configurePins();
   configureInterrupts();
   configureRadio();
-  // goToSleep();
+  goToSleep();
+}
+
+void configurePins(){
+  pinMode(MagButtonPin, INPUT);
+  pinMode(RadioBufferPin, INPUT);
 }
 
 
@@ -60,10 +66,10 @@ void detachRdoBffrIntrpt(){
 
 
 void initEeprom(){
-  // if eeprom reads 255, this is a brand new chip - set the count to zero
-  if (BulletsUsed == 0xFF)
+  // if eeprom reads out of normal range, this is a brand new chip - set the count to zero
+  if (BulletsUsed > MAX_NUM_BULLETS)
   {
-    setEepromBulletsUsed(0);
+    setEepromBulletsUsed(DEFAULT_ROUNDS_USED);
   }
 }
 
@@ -112,44 +118,18 @@ void transmitNumberBulletsUsed(){
 }
 
 
-char* readAck(){
-  char text[3] = "";
-  radio.read(&text, sizeof(text));
-  Serial.print("6 received ack: ");
-  Serial.println(text);
-  return text;
-}
-
-
-void waitForAck(){
-  detachRdoBffrIntrpt();
-  unsigned long startMillis = millis();
-  while (!acknowledged && millis() - startMillis < ACK_WAIT_TIME) { // while 2 seconds isnt up and not ack'd
-    if (radio.available()) {
-      if (strcmp(readAck(), "OK")){ 
-        acknowledged = true; 
-        break;
-      }
-    }
-  }
-  attachRdoBffrIntrpt();
-}
-
-
 void loop() {
-  if (buttonPressed && !acknowledged){
-    waitForAck();
+  if (buttonPressed){
+    // waitForAck();
     waitForMagButtonPress();
-    if (!acknowledged){
-      // goToSleep();
-    }
+    delay(100);
+    goToSleep();
   }
 }
 
 
 void waitForMagButtonPress(){
   buttonPressed = false;
-  pinMode (MagButtonPin, INPUT);
   Serial.println("0 waiting for button press...");
 }
 
@@ -158,8 +138,8 @@ void goToSleep(){
   sleep_enable();
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
   Serial.println("Going to sleep.");
+  delay(1000);
   sleep_cpu();
 }
 
@@ -172,39 +152,35 @@ void wakeUp(){
 
 
 void receiveBulletsUsedUpdate(){
-  char value = readRadioBuffer();
+  readRadioBuffer();
   Serial.print("Received number of bullets used from the chamber: ");
-  Serial.println(value);
-  EEPROM.update(BulletsUsedEepromAddress, value);
+  Serial.println(BulletsUsed);
+  setEepromBulletsUsed(BulletsUsed);
 }
 
 
 char readRadioBuffer(){
-  char* val[1];
-  radio.read(&val, sizeof(val));
-  return val;
+  radio.read(&BulletsUsed, sizeof(BulletsUsed));
+  return BulletsUsed;
 }
 
 
-void interruptSetup(){
+void MagButtonIsrSetup(){
   buttonPressed = true;
   Serial.println("0.5 Button Pressed");
-  pinMode (MagButtonPin, OUTPUT);
-  acknowledged = false;
 }
 
 
 bool isLongPress(){
   bool longPressed = true;
-  for (int i = 0; (i * SLEEP_TIME_MS) < LONG_PRESS_TIME; i++) { // while 2 seconds isnt up and not ack'd
-    delay(SLEEP_TIME_MS);
-    // if magButtonInput goes high, button was released
-    if (digitalRead(MagButtonPin)){
+  for (int i = 0; (i * LOOP_TIME_MS) < LONG_PRESS_TIME; i++) { // while 2 seconds isnt up and not ack'd
+    // Serial.println(digitalRead(MagButtonPin));
+    Serial.print("milliseconds that have passed while button held: ");
+    Serial.println(i * LOOP_TIME_MS);
+    if (digitalRead(MagButtonPin)){ // if magButtonInput goes high, button was released
       longPressed = false;
       break;
     }
-    Serial.print("milliseconds that have passed while button held: ");
-    Serial.println(i * SLEEP_TIME_MS);
   } 
   return longPressed;
 }
@@ -214,15 +190,15 @@ void handleLongPress(bool longPressed){
   if (longPressed)
   {
     Serial.println("Detected long press of mag button.");
-    setEepromBulletsUsed(0);
+    setEepromBulletsUsed(DEFAULT_ROUNDS_USED);
   }
 }
 
 
 void MagButtonISR(){
-  // wakeUp();
+  wakeUp();
   handleLongPress(isLongPress());
-  interruptSetup();
+  MagButtonIsrSetup();
   startTransmitter();
   delay(1);
   transmitSerialNumber();
@@ -233,7 +209,7 @@ void MagButtonISR(){
 
 
 void RadioBufferISR(){
-  // wakeUp();
+  wakeUp();
   receiveBulletsUsedUpdate();
   sei();
 }

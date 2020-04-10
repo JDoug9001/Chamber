@@ -7,13 +7,22 @@
 
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
-const char Acknowledge[3] = "OK";
+const byte TempButtonPin = 2;
+const byte RadioBufferPin = 3;
+const byte DATA_WAIT_TIME = 200;
 const char CurrentMagSerialNumber[17]; // 16 length hex string. each char one of [0123456789ABCDEF]
 volatile byte BulletsUsed; //todo read from eprom
+volatile bool receivedSerialNumAndBulletsUsed = false;
 
 void setup() {
   Serial.begin(9600);
   radio.begin();
+  radio.maskIRQ(1,1,0); 
+  pinMode(TempButtonPin, INPUT);
+  pinMode(RadioBufferPin, INPUT);
+  attachInterrupt(digitalPinToInterrupt(TempButtonPin), TempButtonISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
+  startReceiver();
 }
 
 
@@ -32,26 +41,52 @@ void startTransmitter(){
 
 
 void loop() {
-  startReceiver();
-  while (true) {
-    if (radio.available()) {
-      radio.read(&CurrentMagSerialNumber, sizeof(CurrentMagSerialNumber));
-      Serial.print("2 received serial number: ");
-      Serial.println(CurrentMagSerialNumber);
-      break;
+  if (!receivedSerialNumAndBulletsUsed)
+  {
+    unsigned long startMillis = millis();
+    while (millis() - startMillis < DATA_WAIT_TIME) {
+      if (radio.available()) {
+        radio.read(&CurrentMagSerialNumber, sizeof(CurrentMagSerialNumber));
+        Serial.print("2 received serial number: ");
+        Serial.println(CurrentMagSerialNumber);
+        break;
+      }
     }
-  }
+    delay(100);
 
-  while (true) {
-    if (radio.available()) {
-      radio.read(&BulletsUsed, sizeof(BulletsUsed));
-      Serial.print("4 received number bullets used: ");
-      Serial.println(BulletsUsed);
-      break;
+    startMillis = millis();
+    while (millis() - startMillis < DATA_WAIT_TIME) {
+      if (radio.available()) {
+        radio.read(&BulletsUsed, sizeof(BulletsUsed));
+        Serial.print("4 received number bullets used: ");
+        Serial.println(BulletsUsed);
+        break;
+      }
     }
+    delay(100);
+    receivedSerialNumAndBulletsUsed = true;
+    attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
   }
+}
+
+
+
+void TempButtonISR(){
+  Serial.println("Enter interrupt Temp button");
+  ++BulletsUsed;
   startTransmitter();
-  Serial.print("5 sending ack: ");
-  Serial.println(Acknowledge);
-  radio.write(&Acknowledge, sizeof(Acknowledge));
+  delay(100);
+  Serial.print("Send bullets used: ");
+  Serial.println(BulletsUsed);
+  radio.write(&BulletsUsed, sizeof(BulletsUsed));
+  delay(100);
+  sei();
+  startReceiver();
+}
+
+
+void RadioBufferISR(){
+  detachInterrupt(digitalPinToInterrupt(RadioBufferPin));
+  receivedSerialNumAndBulletsUsed = false;
+  sei();
 }
