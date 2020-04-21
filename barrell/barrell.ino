@@ -1,5 +1,5 @@
 #include "avr/interrupt.h" 
-#include "VL53L0X.h"
+// #include "VL53L0X.h"
 #include <Wire.h>
 #include <SPI.h>
 #include <nRF24L01.h>
@@ -19,8 +19,11 @@ const int TAP_RACK_BANG_TIME = 2; // seconds
 const int TRB_WAIT_INTERVAL = 10; // miliseconds
 const byte DATA_WAIT_TIME = 200;
 const byte address[6] = "00001";
-const byte TempButtonPin = 2;
+const byte TempButtonPin = 2; // button to act as prox sensor input
 const byte RadioBufferPin = 3;
+const byte led1 = 4;
+const byte led2 = 5;
+const byte led3 = 6;
 const char CurrentMagSerialNumber[17]; // 16 length hex string. each char one of [0123456789ABCDEF]
 
 // G L O B A L S
@@ -30,6 +33,8 @@ volatile int BulletsUsed = 0;
 volatile bool jammed = false;
 volatile bool new_magazine = false;
 volatile bool receivedSerialNumAndBulletsUsed = false;
+volatile bool limit_switch = true; // impersonate the limnit switch input
+volatile bool slide_fully_extended = true; // impersonate the slide fully extended input
 
 
 void setup() {
@@ -38,6 +43,9 @@ void setup() {
   radio.maskIRQ(1,1,0); 
   pinMode(TempButtonPin, INPUT);
   pinMode(RadioBufferPin, INPUT);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(TempButtonPin), prox_sensor_ISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
   startReceiver();
@@ -58,7 +66,7 @@ void startTransmitter(){
 }
 
 
-void continuos_mode_ops(){
+void continuous_mode_ops(){
   // Motor turns on for short encoder steps/time
   drive_motor(SHORT_NUM_STEPS);
   return_home();
@@ -67,8 +75,8 @@ void continuos_mode_ops(){
 
 void reload_mode_ops() {
   if (BulletsUsed < NUM_BULLETS){
-    continuos_mode_ops();
-  else 
+    continuous_mode_ops();
+  } else {
     // motor turn long encoder steps
     drive_motor(LONG_NUM_STEPS);
     
@@ -105,7 +113,7 @@ void return_home(){
     // turn backward one step
     drive_motor(-1);
     // if it hits the limit switch
-    if (limit_switch_pressed){
+    if (limit_switch){
       // bail out of loop
       break;
     }
@@ -136,7 +144,7 @@ void rand_mode_ops(){
 void tap_rack_bang(){
   // wait 'wait_seconds' for dist sensor to show slide has been fully extended
   float max_i = TAP_RACK_BANG_TIME*1000 / TRB_WAIT_INTERVAL;
-  for (i = 0; i < max_i; i++){
+  for (int i = 0; i < max_i; i++){
     delay(10);
     if (slide_fully_extended){
       jammed = false;
@@ -146,9 +154,9 @@ void tap_rack_bang(){
 }
 
 
-void set_mag_count(int num_rounds){
+void set_mag_count(){
   Serial.println("Enter interrupt Temp button");
-  ++BulletsUsed;
+  ++BulletsUsed; // add one to number of bullets used
   startTransmitter();
   delay(100);
   Serial.print("Send bullets used: ");
@@ -160,29 +168,38 @@ void set_mag_count(int num_rounds){
 }
 
 
+void waitForNumBullets(){
+  unsigned long startMillis = millis();
+  while (millis() - startMillis < DATA_WAIT_TIME) {
+    if (radio.available()) {
+      radio.read(&BulletsUsed, sizeof(BulletsUsed));
+      Serial.print("4 received number bullets used: ");
+      Serial.println(BulletsUsed);
+      break;
+    }
+  }
+}
+
+
+void waitForSerialNum(){
+  unsigned long startMillis = millis();
+  while (millis() - startMillis < DATA_WAIT_TIME) {
+    if (radio.available()) {
+      radio.read(&CurrentMagSerialNumber, sizeof(CurrentMagSerialNumber));
+      Serial.print("2 received serial number: ");
+      Serial.println(CurrentMagSerialNumber);
+      break;
+    }
+  }
+}
+
+
 void loop() {
   if (!receivedSerialNumAndBulletsUsed)
   {
-    unsigned long startMillis = millis();
-    while (millis() - startMillis < DATA_WAIT_TIME) {
-      if (radio.available()) {
-        radio.read(&CurrentMagSerialNumber, sizeof(CurrentMagSerialNumber));
-        Serial.print("2 received serial number: ");
-        Serial.println(CurrentMagSerialNumber);
-        break;
-      }
-    }
+    waitForSerialNum();
     delay(100);
-
-    startMillis = millis();
-    while (millis() - startMillis < DATA_WAIT_TIME) {
-      if (radio.available()) {
-        radio.read(&BulletsUsed, sizeof(BulletsUsed));
-        Serial.print("4 received number bullets used: ");
-        Serial.println(BulletsUsed);
-        break;
-      }
-    }
+    waitForNumBullets();
     delay(100);
     receivedSerialNumAndBulletsUsed = true;
     attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
@@ -200,10 +217,10 @@ void RadioBufferISR(){
 
 // prox sensor trigger this ISR
 void prox_sensor_ISR(){
-  set_mag_count(++BulletsUsed);
+  set_mag_count();
   switch (mode){
     case 1:
-      continuos_mode_ops();
+      continuous_mode_ops();
       break;
     case 2:
       reload_mode_ops();
@@ -220,21 +237,21 @@ void mode_button_ISR(){
   switch (++mode){
     case 2:
       // light the 2nd LED
-      Blue_Led_1 = LOW;
-      Blue_Led_2 = HIGH; 
-      Blue_Led_3 = LOW;
+      digitalWrite(led1, LOW);
+      digitalWrite(led2, HIGH);
+      digitalWrite(led3, LOW);
       break;
     case 3:
       // light the 3rd LED
-      Blue_Led_1 = LOW;
-      Blue_Led_2 = LOW; 
-      Blue_Led_3 = HIGH;
+      digitalWrite(led1, LOW);
+      digitalWrite(led2, LOW);
+      digitalWrite(led3, HIGH);
       break;
     default:
       mode = 1;
       // light the 1st LED
-      Blue_Led_1 = HIGH;
-      Blue_Led_2 = LOW;
-      Blue_Led_3 = LOW;
+      digitalWrite(led1, HIGH);
+      digitalWrite(led2, LOW);
+      digitalWrite(led3, LOW);
   }
 }
