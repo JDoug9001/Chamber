@@ -19,7 +19,8 @@ const int TAP_RACK_BANG_TIME = 2; // seconds
 const int TRB_WAIT_INTERVAL = 10; // miliseconds
 const byte DATA_WAIT_TIME = 200;
 const byte address[6] = "00001";
-const byte TempButtonPin = 2; // button to act as prox sensor input
+const byte FiringPinProxSensorPin = 2; 
+const byte ModeButtonPin = A0;
 const byte RadioBufferPin = 3;
 const byte led1 = 4;
 const byte led2 = 5;
@@ -28,7 +29,7 @@ const char CurrentMagSerialNumber[17]; // 16 length hex string. each char one of
 
 // G L O B A L S
 RF24 radio(7, 8); // CE, CSN
-volatile byte mode = 1;
+volatile byte mode = 1; //should we put mode in the eeprom so it recalls it?
 volatile int BulletsUsed = 0;
 volatile bool jammed = false;
 volatile bool new_magazine = false;
@@ -37,18 +38,30 @@ volatile bool limit_switch = true; // impersonate the limnit switch input
 volatile bool slide_fully_extended = true; // impersonate the slide fully extended input
 
 
+void pciSetup(byte pin)
+{
+    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
+    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
+    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
+}
+
+
 void setup() {
   Serial.begin(9600);
   radio.begin();
   radio.maskIRQ(1,1,0); 
-  pinMode(TempButtonPin, INPUT);
+  pinMode(FiringPinProxSensorPin, INPUT);
+  pinMode(ModeButtonPin, INPUT);
+  digitalWrite(ModeButtonPin, HIGH);
   pinMode(RadioBufferPin, INPUT);
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
   pinMode(led3, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(TempButtonPin), prox_sensor_ISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(FiringPinProxSensorPin), prox_sensor_ISR, FALLING);
+  pciSetup(ModeButtonPin);
   attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
   startReceiver();
+  setModeLEDs();
 }
 
 
@@ -155,7 +168,6 @@ void tap_rack_bang(){
 
 
 void set_mag_count(){
-  Serial.println("Enter interrupt Temp button");
   ++BulletsUsed; // add one to number of bullets used
   startTransmitter();
   delay(100);
@@ -209,6 +221,7 @@ void loop() {
 
 
 void RadioBufferISR(){
+  Serial.println("Radio has data in the buffer");
   detachInterrupt(digitalPinToInterrupt(RadioBufferPin));
   receivedSerialNumAndBulletsUsed = false;
   sei();
@@ -217,6 +230,7 @@ void RadioBufferISR(){
 
 // prox sensor trigger this ISR
 void prox_sensor_ISR(){
+  Serial.println("Detected firing pin in hall effect sensor");
   set_mag_count();
   switch (mode){
     case 1:
@@ -233,8 +247,18 @@ void prox_sensor_ISR(){
 
 
 // todo: use an interrupt on change interrupt for this on a pin other than 2 or 3
-void mode_button_ISR(){
-  switch (++mode){
+// mode_button_ISR
+ISR(PCINT1_vect){
+  Serial.println("Mode Button was pressed");
+  if (!digitalRead(ModeButtonPin)){
+    ++mode;
+    setModeLEDs();
+  }
+}
+
+
+void setModeLEDs(){
+  switch (mode){
     case 2:
       // light the 2nd LED
       digitalWrite(led1, LOW);
