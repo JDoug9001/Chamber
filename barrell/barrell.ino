@@ -1,9 +1,17 @@
+#include <SparkFun_TB6612.h>
+
 #include "avr/interrupt.h" 
 // #include "VL53L0X.h"
 #include <Wire.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
+#include <SparkFun_TB6612.h>
+
+#define AIN1 4
+#define AIN2 5
+#define PWMA 6
+#define STBY 9
 
 // N O T E S 
 // store magazine name and current_bullets_used in memory
@@ -12,7 +20,9 @@
 // (dont talk to other mags until current mag empty/unresponsive)
 
 // C O N S T A N T S
+const int offsetA = 1;
 const byte NUM_BULLETS = 17;
+const int SLIDE_MOTOR_SPEED = 255;
 const int SHORT_NUM_STEPS = 1;
 const int LONG_NUM_STEPS = 2;
 const int TAP_RACK_BANG_TIME = 2; // seconds
@@ -29,6 +39,7 @@ const char CurrentMagSerialNumber[17]; // 16 length hex string. each char one of
 
 // G L O B A L S
 RF24 radio(7, 8); // CE, CSN
+Motor slideMotor = Motor(AIN1, AIN2, PWMA, offsetA, STBY);
 volatile byte mode = 1; //should we put mode in the eeprom so it recalls it?
 volatile int BulletsUsed = 0;
 volatile bool jammed = false;
@@ -79,9 +90,21 @@ void startTransmitter(){
 }
 
 
+void drive_motor(int num_steps){
+  if (num_steps < 0){
+    slideMotor.drive(-SLIDE_MOTOR_SPEED);
+  } else if (num_steps > 0){
+    slideMotor.drive(SLIDE_MOTOR_SPEED);
+  }
+  delay(abs(num_steps)*1000);
+  slideMotor.brake();
+}
+
+
 void continuous_mode_ops(){
   // Motor turns on for short encoder steps/time
   drive_motor(SHORT_NUM_STEPS);
+  delay(100);
   return_home();
 }
 
@@ -115,16 +138,11 @@ void reload_mode_ops() {
 }
 
 
-void drive_motor(int num_steps){
-  // TODO: figure out what this looks like once we get an encoder
-}
-
-
 void return_home(){
   // over and over forever
   while (true) {
     // turn backward one step
-    drive_motor(-1);
+    drive_motor(-LONG_NUM_STEPS);
     // if it hits the limit switch
     if (limit_switch){
       // bail out of loop
