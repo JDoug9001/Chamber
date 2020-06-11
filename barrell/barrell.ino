@@ -32,9 +32,9 @@ const byte address[6] = "00001";
 const byte FiringPinProxSensorPin = 2; 
 const byte ModeButtonPin = A0;
 const byte RadioBufferPin = 3;
-const byte led1 = 0;
-const byte led2 = 10;
-const byte led3 = 1;
+const byte led1 = A1;
+const byte led2 = A2;
+const byte led3 = A3;
 const char CurrentMagSerialNumber[17]; // 16 length hex string. each char one of [0123456789ABCDEF]
 
 // G L O B A L S
