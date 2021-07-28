@@ -51,9 +51,9 @@ volatile bool slide_fully_extended = true; // impersonate the slide fully extend
 
 void pciSetup(byte pin)
 {
-    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
-    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
-    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
+  *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
+  PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
+  PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
 }
 
 
