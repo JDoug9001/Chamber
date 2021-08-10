@@ -22,6 +22,7 @@
 // C O N S T A N T S
 const int offsetA = 1;
 const byte NUM_BULLETS = 17;
+const int REQUEST_BULLETS_USED = 255;
 const int SLIDE_MOTOR_SPEED = 255;
 const int SHORT_NUM_STEPS = 1;
 const int LONG_NUM_STEPS = 2;
@@ -73,6 +74,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(RadioBufferPin), RadioBufferISR, FALLING);
   startReceiver();
   setModeLEDs();
+  get_mag_count();
 }
 
 
@@ -193,6 +195,21 @@ void set_mag_count(){
   Serial.println(BulletsUsed);
   radio.write(&BulletsUsed, sizeof(BulletsUsed));
   delay(100);
+  sei();
+  startReceiver();
+}
+
+
+void get_mag_count()
+{
+  // do this at the very beginning incase the mag was already powered
+  // which means the barrel wouldnt have heard its broadcast
+  startTransmitter();
+//  delay(100);
+  Serial.print("Send request for bullets used: ");
+  Serial.println(REQUEST_BULLETS_USED);
+  radio.write(&REQUEST_BULLETS_USED, sizeof(REQUEST_BULLETS_USED));
+  delay(10);
   sei();
   startReceiver();
 }

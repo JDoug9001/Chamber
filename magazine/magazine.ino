@@ -153,9 +153,19 @@ void wakeUp(){
 
 void receiveBulletsUsedUpdate(){
   readRadioBuffer();
-  Serial.print("Received number of bullets used from the chamber: ");
-  Serial.println(BulletsUsed);
-  setEepromBulletsUsed(BulletsUsed);
+  if (BulletsUsed > MAX_NUM_BULLETS) {
+    Serial.println("Received request to send number of bullets used.");
+    delay(100);
+    PrepareRadioAndSendMagCount();
+    delay(100);
+    sei();
+    Serial.println("0 waiting for button press...");
+    goToSleep();
+  } else {
+    Serial.print("Received number of bullets used from the chamber: ");
+    Serial.println(BulletsUsed);
+    setEepromBulletsUsed(BulletsUsed); 
+  }
 }
 
 
@@ -195,15 +205,20 @@ void handleLongPress(bool longPressed){
 }
 
 
-void MagButtonISR(){
-  wakeUp();
-  handleLongPress(isLongPress());
-  MagButtonIsrSetup();
+void PrepareRadioAndSendMagCount(){
   startTransmitter();
   delay(1);
   transmitSerialNumber();
   transmitNumberBulletsUsed();
   startReceiver();
+}
+
+
+void MagButtonISR(){
+  wakeUp();
+  handleLongPress(isLongPress());
+  MagButtonIsrSetup();
+  PrepareRadioAndSendMagCount();
   sei();
 }
 
