@@ -1,5 +1,3 @@
-#include <SparkFun_TB6612.h>
-
 #include "avr/interrupt.h" 
 // #include "VL53L0X.h"
 #include <Wire.h>
@@ -22,6 +20,8 @@
 // C O N S T A N T S
 const int offsetA = 1;
 const byte NUM_BULLETS = 17;
+const int LENGTH_OF_1_SECOND = 1000;
+const int STEP_LENGTH = 1000;
 const int REQUEST_BULLETS_USED = 255;
 const int SLIDE_MOTOR_SPEED = 255;
 const int SHORT_NUM_STEPS = 1;
@@ -98,7 +98,7 @@ void drive_motor(int num_steps){
   } else if (num_steps > 0){
     slideMotor.drive(SLIDE_MOTOR_SPEED);
   }
-  delay(abs(num_steps)*1000);
+  delay(abs(num_steps) * STEP_LENGTH);
   slideMotor.brake();
 }
 
@@ -106,7 +106,7 @@ void drive_motor(int num_steps){
 void continuous_mode_ops(){
   // Motor turns on for short encoder steps/time
   drive_motor(SHORT_NUM_STEPS);
-  delay(100);
+  // delay(100);
   return_home();
 }
 
@@ -176,7 +176,7 @@ void rand_mode_ops(){
 
 void tap_rack_bang(){
   // wait 'wait_seconds' for dist sensor to show slide has been fully extended
-  float max_i = TAP_RACK_BANG_TIME*1000 / TRB_WAIT_INTERVAL;
+  float max_i = TAP_RACK_BANG_TIME*LENGTH_OF_1_SECOND / TRB_WAIT_INTERVAL;
   for (int i = 0; i < max_i; i++){
     delay(10);
     if (slide_fully_extended){
