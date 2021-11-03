@@ -10,7 +10,7 @@ RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
 const int LOOP_TIME_MS = 75;
 const byte MAX_NUM_BULLETS = 0x11; // 17 in decimal
-const byte DEFAULT_ROUNDS_USED = 0x00; 
+const byte DEFAULT_ROUNDS_USED = 0x00;
 const int ACK_WAIT_TIME = 2000;
 const int LONG_PRESS_TIME = 3000;
 const byte MagButtonPin = 2;
@@ -154,20 +154,27 @@ void wakeUp(){
 void receiveBulletsUsedUpdate(){
   readRadioBuffer();
   if (BulletsUsed > MAX_NUM_BULLETS) {
-    Serial.println("Received request to send number of bullets used.");
-    delay(100);
-    PrepareRadioAndSendMagCount();
-    delay(100);
-    sei();
-    Serial.println("0 waiting for button press...");
-    goToSleep();
+    getMagCount();
   } else {
     Serial.print("Received number of bullets used from the chamber: ");
     Serial.println(BulletsUsed);
-    setEepromBulletsUsed(BulletsUsed); 
+    setEepromBulletsUsed(BulletsUsed);
+    if (BulletsUsed == MAX_NUM_BULLETS)
+    {
+      Serial.println("Extend magazine ear to push slide stop up.");
+    }
   }
 }
 
+void getMagCount(){
+  Serial.println("Received request to send number of bullets used.");
+  delay(100);
+  PrepareRadioAndSendMagCount();
+  delay(100);
+  sei();
+  Serial.println("0 waiting for button press...");
+  goToSleep();
+}
 
 char readRadioBuffer(){
   radio.read(&BulletsUsed, sizeof(BulletsUsed));

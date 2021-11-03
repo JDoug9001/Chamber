@@ -117,7 +117,10 @@ void reload_mode_ops() {
   } else {
     // motor turn long encoder steps
     drive_motor(LONG_NUM_STEPS);
-    
+    Serial.print("Fired ");
+    Serial.print(NUM_BULLETS);
+    Serial.println(" bullets. Slide locked open by slide stop.");
+
     /* 
     // might need to wait until mag has extended the follower before return slide to home
     // need to experiment to find out for sure
